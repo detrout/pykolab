@@ -1,8 +1,8 @@
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index de9f491..a177eb2 100644
+index de9f491..bb9f48c 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -1,202 +1,20 @@
+@@ -1,202 +1,21 @@
  [encoding: UTF-8]
  ./kolab/__init__.py
 -./test-wallace-send.py
@@ -189,7 +189,7 @@ index de9f491..a177eb2 100644
  ./pykolab/auth/__init__.py
  ./pykolab/auth/ldap/__init__.py
 -./pykolab/auth/ldap/openldap/__init__.py
--./pykolab/auth/ldap/cache.py
+ ./pykolab/auth/ldap/cache.py
 -./pykolab/auth/ldap/rhds/__init__.py
 -./pykolab/auth/ldap/syncrepl.py
 -./pykolab/auth/ldap/msds/__init__.py
@@ -205,7 +205,7 @@ index de9f491..a177eb2 100644
  ./pykolab/logger.py
  ./pykolab/errors.py
  ./pykolab/constants.py
-@@ -224,15 +42,6 @@
+@@ -224,15 +43,6 @@
  ./pykolab/plugins/defaultfolders/__init__.py
  ./pykolab/plugins/dynamicquota/__init__.py
  ./pykolab/plugins/recipientpolicy/__init__.py
@@ -221,7 +221,7 @@ index de9f491..a177eb2 100644
  ./pykolab/setup/__init__.py
  ./pykolab/setup/setup_zpush.py
  ./pykolab/setup/setup_ldap.py
-@@ -244,30 +53,12 @@
+@@ -244,30 +54,12 @@
  ./pykolab/setup/setup_mysql.py
  ./pykolab/setup/setup_freebusy.py
  ./pykolab/imap/__init__.py
@@ -252,3 +252,14 @@ index de9f491..a177eb2 100644
 -./bin/test_parse_policy.py
 -./bonnie.py
  ./saslauthd/__init__.py
+diff --git a/po/POTFILES.skip b/po/POTFILES.skip
+index 2b8d840..478548b 100644
+--- a/po/POTFILES.skip
++++ b/po/POTFILES.skip
+@@ -1 +1,6 @@
+ pykolab/constants.py.in
++kolabtest.py
++pykolab/conf/entitlement.py
++pykolab/tests/__init__.py
++pykolab/tests/imap/test_login.py
++pykolab/tests/tests.py
