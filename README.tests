@@ -1,0 +1,78 @@
+== /!\ Test Execution /!\ ==
+
+Do NOT execute the tests against a production environment.
+
+In case you've missed the previous statement;
+
+Do NOT execute the tests against a production environment.
+
+Why not:
+
+  - the test suites re-initialize your environment without regard to any
+    existing data whatsoever.
+
+== To Execute Tests ==
+
+A configuration section [testing] can be added to /etc/kolab/kolab.conf, which
+may contain the following key/value pairs:
+
+  admin_login = "string"
+
+    Set this to the login name of a (global, cross-domain) Cyrus IMAP manager.
+
+  admin_password = "string"
+
+    This would be... the password for the aforementioned login.
+
+  server = "hostname-or-ip-address"
+
+    A server we can execute the testing against.
+
+  users = [ ]
+
+    A list of dictionaries, each dictionary representing one user with the
+    following attributes:
+
+      givenname
+      sn
+      domain
+      password
+
+    All tests assume %(givenname)s@%(domain)s as the email address corresponding
+    to the user.
+
+    Don't forget that using different domains for the users implies you have set
+    up the Kolab server accordingly.
+
+Now that you have this information, the following might just start testing;
+
+  python ./kolabtest.py --debug 9 --conf /path/to/conf --suite zpush --use-imap
+
+== Writing Test Suites ==
+
+A Test Suite has a title such as "zpush" which then becomes a pykolab.tests
+module. This Test Suite will contain a number of test series (000 through 999),
+each of which contains tests (numbered 000 through 999).
+
+Each Test Suite will (need to) have a file
+
+  "pykolab/tests/%s/__init__.py" %(name.tolower())
+
+defining a
+
+  "class %sTest" %(name.capitalize())
+
+such as in the example here:
+
+  http://git.kolabsys.com/pykolab.git/tree/pykolab/tests/zpush/__init__.py#n30
+
+Creating an object from the class should immediately start loading tests and
+executing them.
+
+Tests themselves are stored in separate files;
+
+  - test_000_000.py with class Test_000_000
+
+  The 000 test in each series (in this case series 000) will *initialize* the
+  environment. That means: Delete all mailboxes, create all mailboxes, set
+  annotations and such and so forth.
