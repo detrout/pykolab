@@ -1,18 +1,23 @@
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index de9f491..07bc08e 100644
+index de9f491..a177eb2 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -1,6 +1,5 @@
+@@ -1,202 +1,20 @@
  [encoding: UTF-8]
  ./kolab/__init__.py
 -./test-wallace-send.py
  ./wallace/__init__.py
- ./wallace/future_module_footer.py
- ./wallace/future_module_correctsentdate.py
-@@ -13,190 +12,18 @@
- ./wallace/future_module_statistics.py
- ./wallace/future_module_bcc.py
- ./wallace/future_module_conversations.py
+-./wallace/future_module_footer.py
+-./wallace/future_module_correctsentdate.py
+ ./wallace/modules.py
+-./wallace/future_module_googletranslate.py
+-./wallace/future_module_dlp.py
+ ./wallace/module_optout.py
+-./wallace/future_module_resources.py
+-./wallace/future_module_freebusy.py
+-./wallace/future_module_statistics.py
+-./wallace/future_module_bcc.py
+-./wallace/future_module_conversations.py
 -./tests/__init__.py
 -./tests/test-002-pykolab_conf_split.py
 -./tests/test-003-conf_get_list.py
@@ -200,7 +205,7 @@ index de9f491..07bc08e 100644
  ./pykolab/logger.py
  ./pykolab/errors.py
  ./pykolab/constants.py
-@@ -224,15 +51,6 @@
+@@ -224,15 +42,6 @@
  ./pykolab/plugins/defaultfolders/__init__.py
  ./pykolab/plugins/dynamicquota/__init__.py
  ./pykolab/plugins/recipientpolicy/__init__.py
@@ -216,7 +221,7 @@ index de9f491..07bc08e 100644
  ./pykolab/setup/__init__.py
  ./pykolab/setup/setup_zpush.py
  ./pykolab/setup/setup_ldap.py
-@@ -244,30 +62,12 @@
+@@ -244,30 +53,12 @@
  ./pykolab/setup/setup_mysql.py
  ./pykolab/setup/setup_freebusy.py
  ./pykolab/imap/__init__.py
