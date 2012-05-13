@@ -1,0 +1,123 @@
+# -*- coding: utf-8 -*-
+# Copyright 2010 Kolab Systems AG (http://www.kolabsys.com)
+#
+# Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen a kolabsys.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; version 3 or, at your option, any later version
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Library General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+
+import math
+import socket
+import sys
+
+from pykolab.translate import _
+
+__license__   = "GPLv2+"
+__copyright__ = "Kolab Systems AG"
+__version__   = '@VERSION@'
+__release__   = '@RELEASE@'
+
+if @RELEASE@ < 1:
+    __status__    = 'snapshot'
+elif math.floor((float)(@RELEASE@)) < (float)(@RELEASE@):
+    __status__    = 'prerelease'
+else:
+    __status__    = 'stable'
+
+domain = 'pykolab'
+
+epilog = _( "PyKolab is a Kolab Systems product. For more information " + \
+            "about Kolab or PyKolab, visit http://www.kolabsys.com")
+
+COMPONENTS = [
+        'imap',
+        'ldap',
+        'mta'
+    ]
+
+hostname = socket.gethostname()
+fqdn = socket.getfqdn()
+try:
+    domain_parts = fqdn.split('.')
+    if len(domain_parts) < 3:
+        print >> sys.stderr, _("WARNING") + ": " + _("The Fully Qualified " + \
+                "Domain Name or FQDN for this system is incorrect. Falling " + \
+                "back to 'localdomain'.")
+        domainname = "localdomain"
+    else:
+        domainname = '.'.join(domain_parts[1:])
+except IndexError:
+    domainname = "localdomain"
+
+# The system RC directory
+RC_DIR = "/etc/rc.d/init.d/"
+KOLAB_LIB_PATH = '/var/lib/kolab/'
+
+# Service map;
+#
+# Convert names of registered system services to their type. For example,
+# on Red Hat, OpenLDAP is 'slapd', whereas on Debian, OpenLDAP is 'ldap'.
+#
+SERVICE_MAP = {
+        'dirsrv': {
+                'type':         '389ds',
+                'description':  _('389 Directory Server or Red Hat Directory Server')
+            },
+        'ldap': {
+                'type':         'openldap',
+                'description':  _('OpenLDAP or compatible')
+            },
+        'slapd': {
+                'type':         'openldap',
+                'description':  _('OpenLDAP or compatible')
+            },
+    }
+
+import ldap
+LDAP_SCOPE = {
+        'base': ldap.SCOPE_BASE,
+        'sub': ldap.SCOPE_SUBTREE,
+        'one': ldap.SCOPE_ONELEVEL
+    }
+
+SUPPORTED_LDAP_CONTROLS = {
+        0: {
+                'desc': 'Persistent Search Control',
+                'oid': '2.16.840.1.113730.3.4.3',
+                'func': '_persistent_search'
+            },
+        1: {
+                'desc': 'Simple Paged Results Control',
+                'oid': '1.2.840.113556.1.4.319',
+                'func': '_paged_search'
+            },
+        2: {
+                'desc': 'Virtual List View Control',
+                'oid': '2.16.840.1.113730.3.4.9',
+                'func': '_vlv_search'
+            },
+        3: {
+                'desc': 'OpenLDAP Syncrepl (RFC4533)',
+                'oid': '1.3.6.1.4.1.4203.1.9.1.1',
+                'func': '_sync_repl'
+            }
+    }
+
+#SUPPORTED_LDAP_CONTROLS = {
+#        0: {
+#                'desc': 'OpenLDAP Syncrepl (RFC4533)',
+#                'oid': '1.3.6.1.4.1.4203.1.9.1.1',
+#                'func': '_sync_repl'
+#            }
+#    }
