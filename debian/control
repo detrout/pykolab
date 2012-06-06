@@ -11,6 +11,12 @@ X-Python-Version: >= 2.4
 
 Package: pykolab
 Architecture: any
-Depends: python, ${python:Depends}, ${misc:Depends}, ${shlibs:Depends}
-Provides: ${python:Provides}
-Description: Kolab Groupware daemon
+Depends: python, ${misc:Depends}
+Description: Kolab Groupware daemon and utilities
+ Python implementation of the Kolab Groupware server
+
+Package: kolab-cli
+Architecture: any
+Depends: pykolab, python, ${misc:Depends}
+Description: Command-line utilities for Kolab
+ This package includes command-line utilities for Kolab Groupware
