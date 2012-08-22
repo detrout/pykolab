@@ -1,3 +1,12 @@
+pykolab (0.4.14-2) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Install setup-kolab.py
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen <vanmeeuwen@auto.kolabsys.com>  Wed, 22 Aug 2012 16:57:44 +0200
+
 pykolab (0.4.14-1) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
