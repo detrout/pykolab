@@ -1,3 +1,12 @@
+pykolab (0.4.14-1) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Imported Upstream version 0.4.14
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen <vanmeeuwen@auto.kolabsys.com>  Wed, 22 Aug 2012 16:03:53 +0200
+
 pykolab (0.4.3-3) unstable; urgency=low
 
   * Initial version
