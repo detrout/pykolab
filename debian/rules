@@ -3,5 +3,14 @@
 %:
 	dh $@ --with python2
 
+override_dh_installinit:
+	cp -a kolabd/kolabd.sysvinit debian/kolab-server.init
+	cp -a kolabd/kolabd.sysconfig debian/kolab-server.default
+	cp -a saslauthd/kolab-saslauthd.sysvinit debian/kolab-saslauthd.init
+	cp -a saslauthd/kolab-saslauthd.sysconfig debian/kolab-saslauthd.default
+	cp -a wallace/wallace.sysvinit debian/wallace.init
+	cp -a wallace/wallace.sysconfig debian/wallace.default
+	dh_installinit
+
 override_dh_installdocs:
 	dh_installdocs --link-doc=pykolab
