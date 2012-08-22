@@ -277,9 +277,9 @@ class LDAP(pykolab.base.Base):
             Get multiple attributes for an entry.
         """
 
-        print entry_id
+        #print entry_id
         entry_dn = self.entry_dn(entry_id)
-        print entry_dn
+        #print entry_dn
 
         _search = self.ldap.search_ext(
                 entry_dn,
@@ -676,7 +676,8 @@ class LDAP(pykolab.base.Base):
                 modlist.append((ldap.MOD_ADD, attribute, attrs[attribute]))
 
         dn = entry_dn
-        self.ldap.modify_s(dn, modlist)
+        if len(modlist) > 0:
+            self.ldap.modify_s(dn, modlist)
 
     def synchronize(self):
         """
@@ -931,7 +932,7 @@ class LDAP(pykolab.base.Base):
 
         cache_entry = cache.get_entry(self.domain, entry)
         if not cache_entry == None:
-            old_canon_attr = cache_entry['result_attribute']
+            old_canon_attr = cache_entry.result_attribute
 
         # See if we have to trigger the recipient policy. Only really applies to
         # situations in which the result_attribute is used in the old or in the

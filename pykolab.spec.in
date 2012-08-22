@@ -68,6 +68,7 @@ Summary:            Kolab SASL Authentication Daemon
 Group:              Applications/System
 BuildRequires:      intltool, gettext, python
 Requires:           %{name} = %{version}-%{release}
+Requires:           cyrus-sasl-plain
 
 %description -n kolab-saslauthd
 Kolab SASL Authentication Daemon for multi-domain, multi-authn database deployments
@@ -247,6 +248,7 @@ rm -rf %{buildroot}
 %files -f pykolab.lang
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING README README.tests
+%doc conf/kolab.conf
 %attr(0640,kolab-n,kolab) %config(noreplace) %{_sysconfdir}/kolab/kolab.conf
 %dir %{python_sitelib}/pykolab/
 %exclude %{python_sitelib}/pykolab/telemetry.*
@@ -263,13 +265,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/pykolab/plugins/defaultfolders
 %{python_sitelib}/pykolab/plugins/dynamicquota
 %{python_sitelib}/pykolab/plugins/recipientpolicy
-%exclude %{python_sitelib}/pykolab/tests/
 %{python_sitelib}/kolab/
-%{python_sitelib}/cyruslib.py
-%{python_sitelib}/cyruslib.pyc
-%{python_sitelib}/cyruslib.pyo
-%dir %{_localstatedir}/lib/kolab/
-%dir %{_localstatedir}/log/kolab/
+%{python_sitelib}/cyruslib.py*
+%attr(0775,kolab,kolab-n) %dir %{_localstatedir}/lib/kolab/
+%attr(0775,kolab,kolab-n) %dir %{_localstatedir}/log/kolab/
 
 %files telemetry
 %defattr(-,root,root,-)
@@ -281,7 +280,6 @@ rm -rf %{buildroot}
 
 %files -n kolab-cli
 %defattr(-,root,root,-)
-%exclude %{_bindir}/kolab-test
 %{_sbindir}/kolab
 %{_sbindir}/kolab-conf
 %{_sbindir}/setup-kolab
@@ -295,6 +293,10 @@ rm -rf %{buildroot}
 %{python_sitelib}/pykolab/setup/*.py
 %{python_sitelib}/pykolab/setup/*.pyc
 %{python_sitelib}/pykolab/setup/*.pyo
+%dir %{python_sitelib}/pykolab/wap_client/
+%{python_sitelib}/pykolab/wap_client/*.py
+%{python_sitelib}/pykolab/wap_client/*.pyc
+%{python_sitelib}/pykolab/wap_client/*.pyo
 
 %files -n kolab-saslauthd
 %defattr(-,root,root,-)
@@ -321,7 +323,7 @@ rm -rf %{buildroot}
 %config(noreplace) %{_sysconfdir}/sysconfig/kolabd
 %{_sbindir}/kolabd
 %{python_sitelib}/kolabd/
-%dir %{_localstatedir}/run/kolabd
+%attr(0770,kolab,kolab) %dir %{_localstatedir}/run/kolabd
 
 %files -n postfix-kolab
 %defattr(-,root,root,-)

@@ -17,9 +17,11 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+import grp
 import logging
 import logging.handlers
 import os
+import pwd
 import sys
 import time
 
@@ -82,17 +84,50 @@ class Logger(logging.Logger):
         else:
             self.logfile = '/var/log/kolab/pykolab.log'
 
+        # Make sure (read: attempt to change) the permissions
         try:
-            filelog_handler = logging.FileHandler(filename=self.logfile)
-            filelog_handler.setFormatter(plaintextformatter)
-        except IOError, e:
-            print >> sys.stderr, _("Cannot log to file %s: %s") % (self.logfile, e)
+            (ruid, euid, suid) = os.getresuid()
+            (rgid, egid, sgid) = os.getresgid()
+        except AttributeError, errmsg:
+            ruid = os.getuid()
+            rgid = os.getgid()
 
-        if not len(self.handlers) > 1:
+        if ruid == 0 or rgid == 0:
             try:
-                self.addHandler(filelog_handler)
+                os.chown(
+                        self.logfile,
+                        pwd.getpwnam('kolab')[2],
+                        grp.getgrnam('kolab-n')[2]
+                    )
+                os.chmod(self.logfile, 0660)
             except:
-                pass
+                print >> sys.stderr, \
+                        _("Could not change the ownership of log file %s") % (
+                                self.logfile
+                            )
+
+        # Make sure the log file exists
+        try:
+            fhandle = file(self.logfile, 'a')
+            try:
+                os.utime(self.logfile, None)
+            finally:
+                fhandle.close()
+
+            try:
+                filelog_handler = logging.FileHandler(filename=self.logfile)
+                filelog_handler.setFormatter(plaintextformatter)
+            except IOError, e:
+                print >> sys.stderr, _("Cannot log to file %s: %s") % (self.logfile, e)
+
+            if not len(self.handlers) > 1:
+                try:
+                    self.addHandler(filelog_handler)
+                except:
+                    pass
+
+        except IOError, errmsg:
+            pass
 
     def remove_stdout_handler(self):
         if not self.fork:

@@ -36,33 +36,41 @@ def ask_question(question, default="", password=False, confirm=False):
         Usage: pykolab.utils.ask_question("What is the server?", default="localhost")
     """
     if password:
-        if default == "":
+        if default == "" or default == None:
             answer = getpass.getpass("%s: " % (question))
         else:
             answer = getpass.getpass("%s [%s]: " % (question, default))
     else:
-        if default == "":
+        if default == "" or default == None:
             answer = raw_input("%s: " % (question))
         else:
             answer = raw_input("%s [%s]: " % (question, default))
 
-    if not answer == "" and not default == "":
+    if not answer == "":
         if confirm:
             answer_confirm = None
             answer_confirmed = False
             while not answer_confirmed:
-                if default == "":
-                    answer_confirm = raw_input("Confirm %s: " % (question))
+                if password:
+                    answer_confirm = getpass.getpass(_("Confirm %s: ") % (question))
                 else:
-                    answer_confirm = raw_input("Confirm %s [%s]: " % (question, default))
+                    answer_confirm = raw_input(_("Confirm %s: ") % (question))
 
                 if not answer_confirm == answer:
                     print >> sys.stderr, _("Incorrect confirmation. " + \
                             "Please try again.")
-                    if default == "":
-                        answer = raw_input("%s: " % (question))
+
+                    if password:
+                        if default == "" or default == None:
+                            answer = getpass.getpass(_("%s: ") % (question))
+                        else:
+                            answer = getpass.getpass(_("%s [%s]: ") % (question, default))
                     else:
-                        answer = raw_input("%s [%s]: " % (question, default))
+                        if default == "" or default == None:
+                            answer = raw_input(_("%s: ") % (question))
+                        else:
+                            answer = raw_input(_("%s [%s]: ") % (question, default))
+
                 else:
                     answer_confirmed = True
 
@@ -77,12 +85,14 @@ def ask_confirmation(question, default="y", all_inclusive_no=True):
         and a "yes" or "no" parsing that can either require an explicit, full
         "yes" or "no", or take the default or any YyNn answer.
     """
+    default_answer = None
+
     if default in [ "y", "Y" ]:
         default_answer = True
         default_no = "n"
         default_yes = "Y"
     elif default in [ "n", "N" ]:
-        default_answer = True
+        default_answer = False
         default_no = "N"
         default_yes = "y"
     else:
@@ -96,20 +106,20 @@ def ask_confirmation(question, default="y", all_inclusive_no=True):
         answer = raw_input("%s [%s/%s]: " % (question,default_yes,default_no))
         # Parse answer and set back to False if not appropriate
         if all_inclusive_no:
+            if answer == "" and not default_answer == None:
+                return default_answer
+            elif answer in [ "y", "Y", "yes" ]:
+                return True
+            elif answer in [ "n", "N", "no" ]:
+                return False
+            else:
+                answer = False
+                print >> sys.stderr, _("Please answer 'yes' or 'no'.")
+        else:
             if not answer in [ "y", "Y", "yes" ]:
                 return False
             else:
                 return True
-        else:
-            if answer in [ "y", "Y", "yes" ]:
-                return True
-            elif answer in [ "n", "N", "no" ]:
-                return False
-            elif answer == "" and not default_answer == None:
-                return default_answer
-            else:
-                answer = False
-                print >> sys.stderr, _("Please answer 'yes' or 'no'.")
 
 def generate_password():
     import subprocess
@@ -148,7 +158,7 @@ def multiline_message(message):
 
     lines.append(line)
 
-    return "\n".join(lines)
+    return "\n%s\n" % ("\n".join(lines))
 
 def normalize(_object):
     if type(_object) == list:
@@ -272,7 +282,10 @@ def translate(mystring, locale_name='en_US'):
     import locale
     import subprocess
 
-    (locale_name,locale_charset) = locale.normalize(locale_name).split('.')
+    if len(locale.normalize(locale_name).split('.')) > 1:
+        (locale_name,locale_charset) = locale.normalize(locale_name).split('.')
+    else:
+        locale_charset = 'utf-8'
 
     locale.setlocale(locale.LC_ALL, (locale_name,locale_charset))
 
