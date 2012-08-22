@@ -62,7 +62,7 @@ domain = ldap:/etc/postfix/ldap/mydestination.cf
 bind_dn = %(service_bind_dn)s
 bind_pw = %(service_bind_pw)s
 
-query_filter = (|(&(|(mail=%%s)(alias=%%s))%(kolab_user_filter)s)%(kolab_group_filter)s)
+query_filter = (&(|(mail=%%s)(alias=%%s))(|%(kolab_user_filter)s%(kolab_group_filter)s))
 result_attribute = mail
 """ % {
                         "base_dn": conf.get('ldap', 'base_dn'),
@@ -170,7 +170,7 @@ domain = ldap:/etc/postfix/ldap/mydestination.cf
 bind_dn = %(service_bind_dn)s
 bind_pw = %(service_bind_pw)s
 
-search_filter = (&(|(mail=%%s)(alias=%%s))(objectclass=kolabinetorgperson))
+query_filter = (&(|(mail=%%s)(alias=%%s))(objectclass=kolabinetorgperson))
 result_attribute = mail
 """ % {
                         "base_dn": conf.get('ldap', 'base_dn'),
@@ -201,7 +201,7 @@ result_attribute = mail
             "submission_recipient_restrictions": "check_policy_service unix:private/submission_policy, permit_sasl_authenticated, reject",
             "submission_sender_restrictions": "reject_non_fqdn_sender, check_policy_service unix:private/submission_policy, permit_sasl_authenticated, reject",
             "submission_data_restrictions": "check_policy_service unix:private/submission_policy",
-            "content-filter": "smtp-amavis:[127.0.0.1]:10024"
+            "content_filter": "smtp-amavis:[127.0.0.1]:10024"
 
         }
 
@@ -249,7 +249,53 @@ result_attribute = mail
         log.error(_("Could not write out Postfix configuration file /etc/postfix/master.cf"))
         return
 
-    subprocess.call(['/etc/pki/tls/certs/make-dummy-cert', '/etc/pki/tls/private/localhost.pem'])
+    amavisd_settings = {
+            'ldap_server': 'localhost',
+            'ldap_bind_dn': conf.get('ldap', 'service_bind_dn'),
+            'ldap_bind_pw': conf.get('ldap', 'service_bind_pw'),
+            'primary_domain': conf.get('kolab', 'primary_domain'),
+            'ldap_filter': "(|(mail=%m)(alias=%m))",
+            'ldap_base_dn': conf.get('ldap', 'base_dn'),
+        }
 
-    subprocess.call(['service', 'postfix', 'restart'])
+    template_file = None
+
+    if os.path.isfile('/etc/kolab/templates/amavisd.conf.tpl'):
+        template_file = '/etc/kolab/templates/amavisd.conf.tpl'
+    elif os.path.isfile('/usr/share/kolab/templates/amavisd.conf.tpl'):
+        template_file = '/usr/share/kolab/templates/amavisd.conf.tpl'
+    elif os.path.isfile(os.path.abspath(os.path.join(__file__, '..', '..', '..', 'share', 'templates', 'amavisd.conf.tpl'))):
+        template_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'share', 'templates', 'amavisd.conf.tpl'))
+
+    if not template_file == None:
+        fp = open(template_file, 'r')
+        template_definition = fp.read()
+        fp.close()
+
+        t = Template(template_definition, searchList=[amavisd_settings])
+        fp = open('/etc/amavisd/amavisd.conf', 'w')
+        fp.write(t.__str__())
+        fp.close()
+
+    else:
+        log.error(_("Could not write out Amavis configuration file /etc/amavisd/amavisd.conf"))
+        return
+
+    if os.path.isfile('/bin/systemctl'):
+        subprocess.call(['systemctl', 'restart', 'postfix.service'])
+        subprocess.call(['systemctl', 'enable', 'postfix.service'])
+        subprocess.call(['systemctl', 'restart', 'amavisd.service'])
+        subprocess.call(['systemctl', 'enable', 'amavisd.service'])
+        subprocess.call(['systemctl', 'restart', 'clamd.amavisd.service'])
+        subprocess.call(['systemctl', 'enable', 'clamd.amavisd.service'])
+    elif os.path.isfile('/sbin/service'):
+        subprocess.call(['service', 'postfix', 'restart'])
+        subprocess.call(['chkconfig', 'postfix', 'on'])
+        subprocess.call(['service', 'amavisd', 'restart'])
+        subprocess.call(['chkconfig', 'amavisd', 'on'])
+        subprocess.call(['service', 'clamd.amavisd', 'restart'])
+        subprocess.call(['chkconfig', 'clamd.amavisd', 'on'])
+    else:
+        log.error(_("Could not start and configure to start on boot, the " + \
+                "postfix, clamav.amavisd and amavisd services."))
 

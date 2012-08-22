@@ -43,7 +43,11 @@ def __init__():
                 module_name = filename.replace('.py','')
                 cmd_name = module_name.replace('cmd_', '')
                 #print "exec(\"from %s import __init__ as %s_register\"" % (module_name,cmd_name)
-                exec("from %s import __init__ as %s_register" % (module_name,cmd_name))
+                try:
+                    exec("from %s import __init__ as %s_register" % (module_name,cmd_name))
+                except ImportError, errmsg:
+                    pass
+
                 exec("%s_register()" % (cmd_name))
 
         for dirname in dirnames:
@@ -59,7 +63,6 @@ def __init__():
     register('add_group', not_yet_implemented, description="Not yet implemented")
     register('delete_group', not_yet_implemented, description="Not yet implemented")
 
-    register('add_domain', not_yet_implemented, description="Not yet implemented")
     register('delete_domain', not_yet_implemented, description="Not yet implemented")
 
 def list_commands(*args, **kw):
@@ -121,10 +124,11 @@ def execute(cmd_name, *args, **kw):
             pass
 
     else:
+        command_name = commands[cmd_name]['cmd_name']
         try:
-            exec("from cmd_%s import cli_options as %s_cli_options" % (cmd_name,cmd_name))
-            exec("%s_cli_options()" % (cmd_name))
-        except ImportError, e:
+            exec("from cmd_%s import cli_options as %s_cli_options" % (command_name,command_name))
+            exec("%s_cli_options()" % (command_name))
+        except ImportError, errmsg:
             pass
 
     conf.finalize_conf()
@@ -164,11 +168,13 @@ def register(cmd_name, func, group=None, description=None, aliases=[]):
     if callable(func):
         if group == None:
             commands[cmd_name] = {
+                    'cmd_name': cmd_name,
                     'function': func,
                     'description': description
                 }
         else:
             commands[group][cmd_name] = {
+                    'cmd_name': cmd_name,
                     'function': func,
                     'description': description
                 }
@@ -179,6 +185,7 @@ def register(cmd_name, func, group=None, description=None, aliases=[]):
 
         for alias in aliases:
             commands[alias] = {
+                    'cmd_name': cmd_name,
                     'function': func,
                     'description': _("Alias for %s") % (cmd_name)
                 }
