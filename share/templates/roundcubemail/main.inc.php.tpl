@@ -93,22 +93,19 @@
             'compose_addressbook',
             'http_authentication',
             'jqueryui',
+            'kolab_activesync',
             'kolab_addressbook',
             'kolab_auth',
             'kolab_core',
             'kolab_config',
             'kolab_folders',
-            'kolab_zpush',
             'listcommands',
             'managesieve',
             'newmail_notifier',
-//            'owncloud',
+            'odfviewer',
             'password',
-
-    // Depends on sieverules
-    //        'quickrules',
-
             'redundant_attachments',
+            'tasklist',
             'threading_as_default',
             // contextmenu must be after kolab_addressbook (#444)
             'contextmenu',
@@ -228,6 +225,7 @@
                     'scope'                     => 'sub',
                     'filter'                    => '(objectClass=inetOrgPerson)',
                     'vlv'                       => false,
+                    'vlv_search'                => false,
                     'fuzzy_search'              => true,
                     'sizelimit'                 => '0',
                     'timelimit'                 => '0',
@@ -262,6 +260,12 @@
             'kolab_addressbook'
         );
 
+    \$rcmail_config['autocomplete_single'] = true;
+
     \$rcmail_config['htmleditor'] = 0;
+
+    include_once("/etc/roundcubemail/kolab_auth.inc.php");
+
+    \$rcmail_config['kolab_cache'] = true;
 
 ?>

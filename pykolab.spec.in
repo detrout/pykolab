@@ -25,8 +25,19 @@ URL:                http://kolab.org/
 Source0:            http://files.kolab.org/releases/%{name}-%{version}.tar.gz
 BuildRoot:          %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch:          noarch
+BuildRequires:      gcc
+BuildRequires:      gettext
+BuildRequires:      glib2-devel
+BuildRequires:      intltool
+BuildRequires:      python
+BuildRequires:      python-icalendar
+BuildRequires:      python-kolabformat
+BuildRequires:      python-ldap
+BuildRequires:      python-nose
 Requires:           kolab-cli = %{version}-%{release}
 Requires:           python-ldap >= 2.4
+Requires:           python-pyasn1
+Requires:           python-pyasn1-modules
 Requires(pre):      /usr/sbin/useradd
 Requires(pre):      /usr/sbin/usermod
 Requires(pre):      /usr/sbin/groupadd
@@ -47,12 +58,23 @@ Requires:           kolab-cli = %{version}-%{release}
 Cyrus IMAP Telemetry logging handling capabilities for Kolab Groupware
 
 ##
+## Kolab XML
+##
+%package xml
+Summary:            Kolab XML format wrapper for %{name}
+Group:              Applications/System
+Requires:           %{name} = %{version}-%{release}
+Requires:           python-kolabformat >= 0.5
+
+%description xml
+Kolab Format XML bindings wrapper for %{name}
+
+##
 ## Kolab CLI
 ##
 %package -n kolab-cli
 Summary:            Kolab CLI components
 Group:              Applications/System
-BuildRequires:      intltool, gettext, python
 Requires:           %{name} = %{version}-%{release}
 Requires:           python-augeas
 Requires:           python-cheetah
@@ -66,8 +88,8 @@ Kolab CLI utilities
 %package -n kolab-saslauthd
 Summary:            Kolab SASL Authentication Daemon
 Group:              Applications/System
-BuildRequires:      intltool, gettext, python
 Requires:           %{name} = %{version}-%{release}
+Requires:           cyrus-sasl
 Requires:           cyrus-sasl-plain
 
 %description -n kolab-saslauthd
@@ -79,7 +101,6 @@ Kolab SASL Authentication Daemon for multi-domain, multi-authn database deployme
 %package -n kolab-server
 Summary:            Kolab Server implemented in Python
 Group:              Applications/System
-BuildRequires:      intltool, gettext, python
 Requires:           %{name} = %{version}-%{release}
 
 %description -n kolab-server
@@ -91,7 +112,6 @@ Kolab Server implemented in Python
 %package -n postfix-kolab
 Summary:            Kolab SMTP Access Policy for Postfix
 Group:              Applications/System
-BuildRequires:      intltool, gettext, python
 Requires:           postfix
 Requires:           %{name} = %{version}-%{release}
 Requires:           python-sqlalchemy
@@ -109,6 +129,8 @@ Group:              Applications/System
 Requires:           %{name} = %{version}-%{release}
 Requires:           python-sqlalchemy
 Requires:           MySQL-python
+Requires:           python-icalendar >= 3.0
+Requires:           %{name}-xml = %{version}-%{release}
 
 %description -n wallace
 This is the Kolab Content Filter, with plugins
@@ -225,9 +247,9 @@ if [ $1 -eq  1 ] ; then
 %endif
 else
 %if 0%{?fedora} >= 15
-    /sbin/service wallace condrestart
-%else
     /bin/systemctl reload-or-try-restart wallace.service
+%else
+    /sbin/service wallace condrestart
 %endif
 fi
 
@@ -235,12 +257,20 @@ fi
 if [ $1 = 0 ]; then
 %if 0%{?fedora} >= 15
     /bin/systemctl --no-reload disable wallace.service
-    /biin/systemctl stop wallace.service
+    /bin/systemctl stop wallace.service
 %else
     /sbin/service wallace stop > /dev/null 2>&1
     /sbin/chkconfig --del wallace
 %endif
 fi
+
+%check
+# RHEL's python unittest does not have assertIsInstance()
+%if 0%{?rhel} > 1
+nosetests -v tests/unit/ ||:
+%else
+nosetests -v tests/unit/
+%endif
 
 %clean
 rm -rf %{buildroot}
@@ -277,6 +307,12 @@ rm -rf %{buildroot}
 #%{python_sitelib}/pykolab/cli/commandgroups/telemetry.py
 %{python_sitelib}/pykolab/telemetry.*
 %{python_sitelib}/pykolab/cli/telemetry/
+
+%files xml
+%dir %{python_sitelib}/pykolab/xml
+%{python_sitelib}/pykolab/xml/*.py
+%{python_sitelib}/pykolab/xml/*.pyc
+%{python_sitelib}/pykolab/xml/*.pyo
 
 %files -n kolab-cli
 %defattr(-,root,root,-)
@@ -341,6 +377,8 @@ rm -rf %{buildroot}
 %{_sysconfdir}/sysconfig/wallace
 %{_sbindir}/wallaced
 %{python_sitelib}/wallace
+%attr(0700,%{kolab_user},%{kolab_group}) %dir %{_var}/spool/pykolab
+%attr(0700,%{kolab_user},%{kolab_group}) %dir %{_var}/spool/pykolab/wallace
 
 %changelog
 * @DATESTAMP@ Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com> @VERSION@-@RELEASE@

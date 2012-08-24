@@ -17,45 +17,49 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-import time
-import traceback
+import sys
 
-from pykolab.tests import tests
+import commands
 
 import pykolab
 
+from pykolab.imap import IMAP
 from pykolab.translate import _
 from pykolab import utils
 
-log = pykolab.getLogger('pykolab.tests')
+log = pykolab.getLogger('pykolab.cli')
 conf = pykolab.getConf()
 
-auth = pykolab.auth
-imap = pykolab.imap
-
 def __init__():
-    tests.register('login', execute, group='imap', description=description())
+    commands.register('delete_mailbox_acl', execute, description=description(), aliases=['dam'])
 
 def description():
-    return """Connect to IMAP and login."""
+    return """Delete an ACL entry for a folder."""
 
 def execute(*args, **kw):
     try:
-        log.debug(_("Connecting at %s") % (time.time()), level=8)
-        imap.connect(login=False)
-        log.debug(_("Connected at %s") % (time.time()), level=8)
-    except:
-        raise TestFailureException, __file__
+        folder = conf.cli_args.pop(0)
+        try:
+            identifier = conf.cli_args.pop(0)
+        except IndexError, errmsg:
+            identifier = utils.ask_question(_("ACI Subject"))
 
-    try:
-        log.debug(_("Logging in at %s") % (time.time()), level=8)
-        imap.login('doe', password='0cvRKSdluPU4ewN')
-        log.debug(_("Logged in at %s") % (time.time()), level=8)
-        #imap.login('doe', password='bla')
-    except:
-        raise TestFailureException(__file__)
+    except IndexError, errmsg:
+        folder = utils.ask_question(_("Folder name"))
+        quota = utils.ask_question(_("ACI Subject"))
 
-class TestFailureException(BaseException):
-    def __init__(self, test_file):
-        log.error(_("Test failure in %s") % (test_file))
-        utils.ask_confirmation('Would you like to log this as a bug?')
+    if len(folder.split('@')) > 1:
+        domain = folder.split('@')[1]
+    else:
+        domain = conf.get('kolab', 'primary_domain')
+
+    imap = IMAP()
+    imap.connect(domain=domain)
+
+    if not imap.has_folder(folder):
+        print >> sys.stderr, _("No such folder %r") % (folder)
+
+    else:
+        folders = imap.lm(folder)
+        for folder in folders:
+            imap.set_acl(folder, identifier, '')

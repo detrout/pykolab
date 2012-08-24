@@ -132,10 +132,10 @@ smtp-amavis     unix    -   -   n   -       3   smtp
     -o max_use=20
 
 #
-# Listener to re-inject email from Amavsid into Postfix
+# Listener to re-inject email from Amavisd into Postfix
 #
 127.0.0.1:10025 inet    n   -   n   -       100 smtpd
-    -o content_filter=
+    -o content_filter=smtp-wallace:[127.0.0.1]:10026
     -o local_recipient_maps=
     -o relay_recipient_maps=
     -o smtpd_restriction_classes=

@@ -17,24 +17,48 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-from pykolab.tests import tests
+import sys
+
+import commands
 
 import pykolab
 
+from pykolab.imap import IMAP
 from pykolab.translate import _
 
-log = pykolab.getLogger('pykolab.tests')
+log = pykolab.getLogger('pykolab.cli')
 conf = pykolab.getConf()
 
-auth = pykolab.auth
-imap = pykolab.imap
-
 def __init__():
-    tests.register('login_admin', execute, group='imap', description=description())
+    commands.register('list_quota', execute, description=description(), aliases=['lq'])
 
 def description():
-    return """Connect to IMAP and login as an administrator."""
+    return """List quota for a folder."""
 
 def execute(*args, **kw):
+    """
+        List quota for a mailbox
+    """
+
+    try:
+        quota_folder = conf.cli_args.pop(0)
+    except IndexError, e:
+        quota_folder = '*'
+
+    imap = IMAP()
     imap.connect()
+
+    folders = []
+
+    quota_folders = imap.lm(quota_folder)
+    for quota_folder in quota_folders:
+        try:
+            (used, quota) = imap.get_quota(quota_folder)
+            percentage = round((used/quota)*100, 1)
+            print "%d (Used: %d, Percentage: %d)" % (quota, used, percentage)
+        except:
+            (quota_root, used, quota) = imap.get_quota_root(quota_folder)
+            percentage = round((used/quota)*100, 1)
+            print "%d (Root: %s, Used: %d, Percentage: %d)" % (quota, quota_root, used, percentage)
+
 

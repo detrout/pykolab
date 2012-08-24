@@ -55,11 +55,11 @@ class Auth(pykolab.base.Base):
             optionally, the realm.
         """
 
-        #if len(login) == 3:
+        if len(login) == 3:
             # The realm has not been specified. See if we know whether or not
             # to use virtual_domains, as this may be a cause for the realm not
             # having been specified seperately.
-            #use_virtual_domains = conf.get('imap', 'virtual_domains')
+            use_virtual_domains = conf.get('imap', 'virtual_domains')
 
             # TODO: Insert debug statements
             #if use_virtual_domains == "userid":
@@ -91,7 +91,8 @@ class Auth(pykolab.base.Base):
             back to the primary domain specified by the configuration.
         """
 
-        log.debug(_("Called for domain %r") % (domain))
+        log.debug(_("Called for domain %r") % (domain), level=9)
+
         if not self._auth == None:
             return
 
@@ -102,9 +103,19 @@ class Auth(pykolab.base.Base):
             self.list_domains()
             section = domain
 
+        log.debug(
+                _("Using section %s and domain %s") % (section,domain),
+                level=9
+            )
+
         if self.secondary_domains.has_key(domain):
             section = self.secondary_domains[domain]
             domain = self.secondary_domains[domain]
+
+        log.debug(
+                _("Using section %s and domain %s") % (section,domain),
+                level=9
+            )
 
         log.debug(
                 _("Connecting to Authentication backend for domain %s") % (
@@ -117,16 +128,33 @@ class Auth(pykolab.base.Base):
             section = 'kolab'
 
         if not conf.has_option(section, 'auth_mechanism'):
-            section = 'kolab'
+            log.debug(
+                    _("Section %s has no option 'auth_mechanism'") % (section),
+                    level=9
+                )
 
+            section = 'kolab'
+        else:
+            log.debug(
+                    _("Section %s has auth_mechanism: %r") % (
+                            section,
+                            conf.get(section,'auth_mechanism')
+                        ),
+                    level=9
+                )
+
+        # Get the actual authentication and authorization backend.
         if conf.get(section, 'auth_mechanism') == 'ldap':
+            log.debug(_("Starting LDAP..."), level=9)
             from pykolab.auth import ldap
             self._auth = ldap.LDAP(self.domain)
+
         elif conf.get(section, 'auth_mechanism') == 'sql':
             from pykolab.auth import sql
             self._auth = sql.SQL(self.domain)
 
         else:
+            log.debug(_("Starting LDAP..."), level=9)
             from pykolab.auth import ldap
             self._auth = ldap.LDAP(self.domain)
 
@@ -163,11 +191,19 @@ class Auth(pykolab.base.Base):
         else:
             return result
 
-    def find_user(self, attr, value, **kw):
-        return self._auth._find_user(attr, value, domain=domain, **kw)
+    def find_resource(self, address):
+        """
+            Find one or more resources corresponding to the recipient address.
+        """
+        result = self._auth.find_resource(address)
 
-    def search_users(self, attr, value, **kw):
-        return self._auth._search_users(attr, value, domain=domain, **kw)
+        if isinstance(result, list) and len(result) == 1:
+            return result[0]
+        else:
+            return result
+
+    def find_user(self, attr, value, **kw):
+        return self._auth._find_user(attr, value, **kw)
 
     def list_domains(self):
         """
@@ -208,14 +244,26 @@ class Auth(pykolab.base.Base):
     def get_entry_attribute(self, domain, entry, attribute):
         return self._auth.get_entry_attribute(entry, attribute)
 
+    def get_entry_attributes(self, domain, entry, attributes):
+        return self._auth.get_entry_attributes(entry, attributes)
+
     def get_user_attribute(self, domain, user, attribute):
         return self._auth.get_entry_attribute(user, attribute)
 
     def get_user_attributes(self, domain, user, attributes):
         return self._auth.get_entry_attributes(user, attributes)
 
+    def search_entry_by_attribute(self, attr, value, **kw):
+        return self._auth.search_entry_by_attribute(attr, value, **kw)
+
     def search_mail_address(self, domain, mail_address):
         return self._auth._search_mail_address(domain, mail_address)
+
+    def set_entry_attribute(self, domain, entry, attribute):
+        return self._auth.set_entry_attribute(entry, attribute)
+
+    def set_entry_attributes(self, domain, entry, attributes):
+        return self._auth.set_entry_attributes(entry, attributes)
 
     def set_user_attribute(self, domain, user, attribute, value):
         self._auth._set_user_attribute(user, attribute, value)

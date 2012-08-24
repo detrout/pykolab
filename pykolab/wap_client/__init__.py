@@ -2,36 +2,72 @@
 import json
 import httplib
 import sys
+from urlparse import urlparse
 
-sys.path.append('../..')
+import pykolab
 
 from pykolab import utils
+from pykolab.translate import _
+
+log = pykolab.getLogger('pykolab.wap_client')
+conf = pykolab.getConf()
+
+if not hasattr(conf, 'defaults'):
+    conf.finalize_conf()
 
 API_HOSTNAME = "localhost"
-API_PORT = "80"
 API_SCHEME = "http"
-API_BASE = "/kolab-webadmin/api"
+API_PORT = 80
+API_BASE = "/kolab-webadmin/api/"
+
+kolab_wap_url = conf.get('kolab_wap', 'api_url')
+
+if not kolab_wap_url == None:
+    result = urlparse(kolab_wap_url)
+else:
+    result = None
+
+if hasattr(result, 'hostname'):
+    API_HOSTNAME = result.hostname
+
+if hasattr(result, 'port'):
+    API_PORT = result.port
+
+if hasattr(result, 'path'):
+    API_BASE = result.path
 
 session_id = None
 
 conn = None
 
 from connect import connect
-from request import request
 
-def authenticate(username=None, password=None):
+def authenticate(username=None, password=None, domain=None):
     global session_id
 
+    conf_username = conf.get('ldap', 'service_bind_dn')
+    conf_password = conf.get('ldap', 'service_bind_pw')
+
     if username == None:
-        username = utils.ask_question("Login", "cn=Directory Manager")
+        username = utils.ask_question("Login", default=conf_username)
+
+    if username == conf_username:
+        password = conf_password
+
+    if username == conf.get('ldap', 'bind_dn'):
+        password = conf.get('ldap', 'bind_pw')
 
     if password == None:
-        password = utils.ask_question("Password", password=True)
+        password = utils.ask_question("Password", default=conf_password, password=True)
+
+    if domain == None:
+        domain = conf.get('kolab', 'primary_domain')
 
     params = json.dumps(
             {
                     'username': username,
-                    'password': password
+                    'password': password,
+                    'domain': domain
                 }
         )
 
@@ -49,14 +85,51 @@ def connect():
 
     return conn
 
+def domain_add(domain, parent=None):
+    params = {
+            'domain': domain,
+        }
+
+    dna = conf.get('ldap', 'domain_name_attribute')
+
+    if not parent == None:
+        domains = domains_list()
+        parent_found = False
+        if isinstance(domains['list'], dict):
+            for _domain in domains['list'].keys():
+                if parent_found:
+                    continue
+
+                if isinstance(domains['list'][_domain][dna], basestring):
+                    if parent == domains['list'][_domain][dna]:
+                        parent_found = True
+                elif isinstance(domains['list'][_domain][dna], list):
+                    if parent in domains['list'][_domain][dna]:
+                        parent_found = True
+
+        if parent_found:
+            params['parent'] = parent
+        else:
+            log.error(_("Invalid parent domain"))
+            return
+
+    params = json.dumps(params)
+
+    return request('POST', 'domain.add', params)
+
+def domain_info(domain):
+    return request('GET', 'domain.info?domain=%s' % (domain))
+
 def domains_capabilities():
     return request('GET', 'domains.capabilities')
 
 def domains_list():
     return request('GET', 'domains.list')
 
-def domain_info(domain):
-    return request('GET', 'domain.info?domain=%s' % (domain))
+def form_value_generate(params):
+    params = json.dumps(params)
+
+    return request('POST', 'form_value.generate', params)
 
 def get_group_input():
     group_types = group_types_list()
@@ -123,8 +196,6 @@ def get_user_input():
             'user_type_id': user_type_id
         }
 
-    print user_type_info
-
     for attribute in user_type_info['form_fields'].keys():
         params[attribute] = utils.ask_question(attribute)
 
@@ -168,33 +239,35 @@ def groups_list():
     return request('GET', 'groups.list')
 
 def request(method, api_uri, params=None, headers={}):
-    global session_id
-
-    if not session_id == None:
-        headers["X-Session-Token"] = session_id
-
-    conn = connect()
-    conn.request(method.upper(), "%s/%s" % (API_BASE,api_uri), params, headers)
-    response = conn.getresponse()
-    data = response.read()
-
-    print method, api_uri, params
-    print data
-
-    try:
-        response_data = json.loads(data)
-    except ValueError, e:
-        # Some data is not JSON
-        print "Response data is not JSON"
-        sys.exit(1)
-
-    print response_data
+    response_data = request_raw(method, api_uri, params, headers)
 
     if response_data['status'] == "OK":
         del response_data['status']
         return response_data['result']
     else:
         return response_data['result']
+
+def request_raw(method, api_uri, params=None, headers={}):
+    global session_id
+
+    if not session_id == None:
+        headers["X-Session-Token"] = session_id
+
+    conn = connect()
+    log.debug(_("Requesting %r with params %r") % ("%s/%s" % (API_BASE,api_uri), params), level=8)
+    conn.request(method.upper(), "%s/%s" % (API_BASE,api_uri), params, headers)
+    response = conn.getresponse()
+
+    data = response.read()
+
+    log.debug(_("Got response: %r") % (data), level=8)
+    try:
+        response_data = json.loads(data)
+    except ValueError, e:
+        # Some data is not JSON
+        log.error(_("Response data is not JSON"))
+
+    return response_data
 
 def role_capabilities():
     return request('GET', 'role.capabilities')
@@ -330,8 +403,6 @@ def role_info(params=None):
                 'role': role
             }
 
-    print role
-
     role = request('GET', 'role.info?role=%s' % (params['role'].keys()[0]))
 
     return role
@@ -351,8 +422,9 @@ def user_form_value_generate_userpassword(*args, **kw):
     result = form_value_generate_password()
     return { 'userpassword': result['password'] }
 
-def user_info():
-    user = utils.ask_question("User email address")
+def user_info(user=None):
+    if user == None:
+        user = utils.ask_question("User email address")
     user = request('GET', 'user.info?user=%s' % (user))
     return user
 
