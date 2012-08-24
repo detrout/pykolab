@@ -71,8 +71,8 @@ def execute(*args, **kw):
                         )
                 )[:24],
 
-            'imap_admin_login': conf.get('cyrus-imapd', 'admin_login'),
-            'imap_admin_password': conf.get('cyrus-imapd', 'admin_password'),
+            'imap_admin_login': conf.get('cyrus-imap', 'admin_login'),
+            'imap_admin_password': conf.get('cyrus-imap', 'admin_password'),
             'ldap_base_dn': conf.get('ldap', 'base_dn'),
             'ldap_group_base_dn': conf.get('ldap', 'group_base_dn'),
             'ldap_group_filter': conf.get('ldap', 'group_filter'),
@@ -82,6 +82,7 @@ def execute(*args, **kw):
             'ldap_user_base_dn': conf.get('ldap', 'user_base_dn'),
             'ldap_user_filter': conf.get('ldap', 'user_filter'),
             'mysql_uri': 'mysqli://roundcube:%s@localhost/roundcube' % (mysql_roundcube_password),
+            'conf': conf
         }
 
 
@@ -144,6 +145,13 @@ def execute(*args, **kw):
                     schema_files.append(schema_filepath)
 
     for root, directories, filenames in os.walk('/usr/share/roundcubemail/plugins/calendar/drivers/kolab/'):
+        for filename in filenames:
+            if filename.startswith('mysql') and filename.endswith('.sql'):
+                schema_filepath = os.path.join(root,filename)
+                if not schema_filepath in schema_files:
+                    schema_files.append(schema_filepath)
+
+    for root, directories, filenames in os.walk('/usr/share/roundcubemail/plugins/libkolab/'):
         for filename in filenames:
             if filename.startswith('mysql') and filename.endswith('.sql'):
                 schema_filepath = os.path.join(root,filename)

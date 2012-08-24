@@ -18,19 +18,47 @@
 #
 
 import asyncore
+import binascii
+from distutils import version
+import grp
+import multiprocessing
 import os
+import pwd
 from smtpd import SMTPChannel
+import socket
+import struct
 import sys
 import tempfile
-import threading
 import time
 import traceback
 
 import pykolab
+from pykolab import utils
 from pykolab.translate import _
 
 log = pykolab.getLogger('pykolab.wallace')
 conf = pykolab.getConf()
+
+max_threads = 24
+
+def pickup_message(filepath, *args, **kw):
+    wallace_modules = args[0]
+    if kw.has_key('module'):
+
+        # Cause the previous modules to be skipped
+        wallace_modules = wallace_modules[(wallace_modules.index(kw['module'])+1):]
+
+        # Execute the module
+        if kw.has_key('stage'):
+            modules.execute(kw['module'], filepath, stage=kw['stage'])
+        else:
+            modules.execute(kw['module'], filepath)
+
+    for module in wallace_modules:
+        modules.execute(module, filepath)
+
+def worker_process(*args, **kw):
+    log.debug(_("Worker process %s initializing") % (multiprocessing.current_process().name), level=1)
 
 class WallaceDaemon(object):
     def __init__(self):
@@ -90,196 +118,38 @@ class WallaceDaemon(object):
 
         conf.finalize_conf()
 
+        utils.ensure_directory(
+                os.path.dirname(conf.pidfile),
+                conf.process_username,
+                conf.process_groupname
+            )
+
         import modules
         modules.__init__()
 
-    def process_message(self, peer, mailfrom, rcpttos, data):
-        """
-            We have retrieved the message.
-
-            - Dispatch to virus-scanning and anti-spam filtering?
-                Not for now. We use some sort of re-injection.
-
-            - Apply access policies;
-                - Maximum number of recipients,
-                - kolabAllowSMTPSender,
-                - kolabAllowSMTPRecipient,
-                - Rule-based matching against white- and/or blacklist
-                - ...
-
-            - Accounting
-
-            - Data Loss Prevention
-        """
-        inheaders = 1
-
-        (fp, filename) = tempfile.mkstemp(dir="/var/spool/pykolab/wallace/")
-        os.write(fp, data)
-        os.close(fp)
-
-        while threading.active_count() > 25:
-            log.debug(
-                    _("Number of threads currently running: %d") % (
-                            threading.active_count()
-                        ),
-                    level=8
-                )
-
-            time.sleep(1)
-
-        log.debug(
-                _("Continuing with %d threads currently running") % (
-                        threading.active_count()
-                    ),
-                level=8
-            )
-
-        # TODO: Apply throttling
-        log.debug(_("Creating thread for message in %s") % (filename), level=8)
-
-        thread = threading.Thread(target=self.thread_run, args=[ filename ])
-        thread.start()
-
-    def thread_run(self, filename, *args, **kw):
-        while threading.active_count() > 25:
-            log.debug(
-                    _("Number of threads currently running: %d") % (
-                            threading.active_count()
-                        ),
-                    level=8
-                )
-
-            time.sleep(10)
-
-        log.debug(
-                _("Continuing with %d threads currently running") % (
-                        threading.active_count()
-                    ),
-                level=8
-            )
-
-        log.debug(
-                _("Running thread %s for message file %s") % (
-                        threading.current_thread().name,
-                        filename
-                    ),
-                level=8
-            )
-
-        if kw.has_key('module'):
-            log.debug(
-                    _("This message was already in module %s, delegating " + \
-                        "specifically to that module") % (
-                            kw['module']
-                        ),
-                    level=8
-                )
-
-            if kw.has_key('stage'):
-                log.debug(
-                        _("It was also in a certain stage: %s, letting " + \
-                            "module %s know that") % (
-                                kw['stage'],
-                                kw['module']
-                            ),
-                        level=8
-                    )
-
-                log.debug(_("Executing module %s") % (kw['module']), level=8)
-
-                modules.execute(kw['module'], filename, stage=kw['stage'])
-
-                return
-
-            log.debug(_("Executing module %s") % (kw['module']), level=8)
-            modules.execute(kw['module'], filename, stage=kw['stage'])
-
-            return
-
-        wallace_modules = conf.get_list('wallace', 'modules')
-        if wallace_modules == None:
-            wallace_modules = []
-
-        for module in wallace_modules:
-            log.debug(_("Executing module %s") % (module), level=8)
-            modules.execute(module, filename)
-
-    def pickup_defer(self):
-        wallace_modules = conf.get_list('wallace', 'modules')
-
-        if wallace_modules == None:
-            wallace_modules = []
-
-        base_path = '/var/spool/pykolab/wallace/'
-
-        while 1:
-            file_count = 0
-
-            log.debug(_("Picking up deferred messages for wallace"), level=8)
-
-            defer_path = os.path.join(base_path, 'DEFER')
-
-            if os.path.isdir(defer_path):
-                for root, directory, files in os.walk(defer_path):
-                    for filename in files:
-                        filepath = os.path.join(root, filename)
-
-                        file_count += 1
-
-                        for module in wallace_modules:
-                            modules.execute(module, filepath)
-
-                        time.sleep(1)
-
-            time.sleep(1)
-
-            for module in wallace_modules:
-                log.debug(
-                        _("Picking up deferred messages for module %s") % (
-                                module
-                            ),
-                        level=8
-                    )
-
-                module_defer_path = os.path.join(base_path, module, 'DEFER')
-
-                if os.path.isdir(module_defer_path):
-                    for root, directory, files in os.walk(module_defer_path):
-                        for filename in files:
-                            filepath = os.path.join(root, filename)
-
-                            file_count += 1
-
-                            modules.execute(module, filepath)
-
-                            time.sleep(1)
-
-                time.sleep(1)
-
-            # Sleep for 300 seconds before reprocessing the deferred queues.
-            # TODO: Consider using queue_run_delay from Postfix, which is where
-            # the default value of 300 seconds comes from.
-            log.debug(_("Sleeping for 300 seconds"), level=8)
-            time.sleep(300)
+        self.modules = conf.get_list('wallace', 'modules')
+        if self.modules == None:
+            self.modules = ['resources']
+        elif not 'resources' in self.modules:
+            self.modules.append('resources')
 
     def do_wallace(self):
-        import binascii
-        import socket
-        import struct
+        if version.StrictVersion(sys.version[:3]) >= version.StrictVersion("2.7"):
+            self.pool = multiprocessing.Pool(max_threads, worker_process, (), 1)
+        else:
+            self.pool = multiprocessing.Pool(max_threads, worker_process, ())
 
-        #s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        ## TODO: The wallace socket path could be a setting.
-        #try:
-            #os.remove('/var/run/kolab/wallace')
-        #except:
-            ## TODO: Do the "could not remove, could not start dance"
-            #pass
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
         bound = False
+        shutdown = False
         while not bound:
             try:
+                if shutdown:
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
                 s.bind((conf.wallace_bind_address, conf.wallace_port))
                 bound = True
             except Exception, e:
@@ -291,19 +161,17 @@ class WallaceDaemon(object):
                             )
                     )
 
-                try:
-                    s.shutdown(1)
-                except Exception, e:
-                    log.warning(_("Could not shut down socket"))
+                while not shutdown:
+                    try:
+                        s.shutdown(socket.SHUT_RDWR)
+                        shutdown = True
+                    except Exception, e:
+                        log.warning(_("Could not shut down socket"))
+                        time.sleep(1)
 
                 s.close()
 
                 time.sleep(1)
-
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        #os.chmod('/var/run/kolab/wallace', 0777)
-        #os.chgrp('/var/run/wallace/mux', 'kolab')
-        #os.chown('/var/run/wallace/mux', 'kolab')
 
         s.listen(5)
 
@@ -346,68 +214,40 @@ class WallaceDaemon(object):
                     if stage.lower() == "defer":
                         continue
 
-                    log.debug(
-                            _("Number of threads currently running: %d") % (
-                                    threading.active_count()
-                                ),
-                            level=8
-                        )
-
-                    thread = threading.Thread(
-                            target = self.thread_run,
-                            args = [ filepath ],
-                            kwargs = {
-                                    "module": '%s' % (module),
-                                    "stage": '%s' % (stage)
-                                }
-                        )
-
-                    thread.start()
-                    time.sleep(0.5)
+                    self.pool.apply_async(pickup_message, (filepath, (self.modules), {'module': module, 'stage': stage}))
 
                     continue
 
-                log.debug(
-                        _("Picking up spooled email file %s") % (
-                                filepath
-                            ),
-                        level=8
-                    )
+                self.pool.apply_async(pickup_message, (filepath, (self.modules)))
 
-                log.debug(
-                        _("Number of threads currently running: %d") % (
-                                threading.active_count()
-                            ),
-                        level=8
-                    )
+        try:
+            while 1:
+                pair = s.accept()
+                log.info(_("Accepted connection"))
+                if not pair == None:
+                    connection, address = pair
+                    #print "Accepted connection from %r" % (address)
+                    channel = SMTPChannel(self, connection, address)
+                    asyncore.loop()
+        except Exception, errmsg:
+            traceback.print_exc()
+            s.shutdown(1)
+            s.close()
 
-                thread = threading.Thread(
-                        target=self.thread_run,
-                        args=[ filepath ]
-                    )
+    def process_message(self, peer, mailfrom, rcpttos, data):
+        """
+            We have retrieved the message. This should be as fast as possible,
+            and not ever block.
+        """
+        inheaders = 1
 
-                thread.start()
-                time.sleep(0.5)
+        (fp, filename) = tempfile.mkstemp(dir="/var/spool/pykolab/wallace/")
+        os.write(fp, data)
+        os.close(fp)
 
-        pid = os.fork()
+        self.pool.apply_async(pickup_message, (filename, (self.modules)))
 
-        if pid == 0:
-            self.pickup_defer()
-        else:
-
-            try:
-                while 1:
-                    pair = s.accept()
-                    log.info(_("Accepted connection"))
-                    if not pair == None:
-                        connection, address = pair
-                        #print "Accepted connection from %r" % (address)
-                        channel = SMTPChannel(self, connection, address)
-                        asyncore.loop()
-            except Exception, errmsg:
-                traceback.print_exc()
-                s.shutdown(1)
-                s.close()
+        return
 
     def reload_config(self, *args, **kw):
         pass
@@ -499,16 +339,17 @@ class WallaceDaemon(object):
 
         try:
             pid = 1
+
             if conf.fork_mode:
-                self.thread_count += 1
-                self.write_pid()
-                self.set_signal_handlers()
                 pid = os.fork()
 
             if pid == 0:
                 log.remove_stdout_handler()
-
-            self.do_wallace()
+                self.write_pid()
+                self.set_signal_handlers()
+                self.do_wallace()
+            elif not conf.fork_mode:
+                self.do_wallace()
 
         except SystemExit, e:
             exitcode = e
@@ -540,6 +381,9 @@ class WallaceDaemon(object):
 
     def write_pid(self):
         pid = os.getpid()
-        fp = open(conf.pidfile,'w')
-        fp.write("%d\n" % (pid))
-        fp.close()
+        if os.access(os.path.dirname(conf.pidfile), os.W_OK):
+            fp = open(conf.pidfile,'w')
+            fp.write("%d\n" % (pid))
+            fp.close()
+        else:
+            print >> sys.stderr, _("Could not write pid file %s") % (conf.pidfile)

@@ -17,24 +17,47 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-from pykolab.tests import tests
+import commands
 
 import pykolab
 
+from pykolab.imap import IMAP
 from pykolab.translate import _
+from pykolab import utils
 
-log = pykolab.getLogger('pykolab.tests')
+log = pykolab.getLogger('pykolab.cli')
 conf = pykolab.getConf()
 
-auth = pykolab.auth
-imap = pykolab.imap
-
 def __init__():
-    tests.register('login', execute, group='wap', description=description())
+    commands.register('list_mailbox_acls', execute, description=description(), aliases=['lam'])
 
 def description():
-    return """Log in to the Kolab Web Administration Panel API."""
+    return """Obtain a list of ACL entries on a folder."""
 
 def execute(*args, **kw):
-    return
+    try:
+        folder = conf.cli_args.pop(0)
+    except IndexError, errmsg:
+        folder = utils.ask_question(_("Folder name"))
+
+    if len(folder.split('@')) > 1:
+        domain = folder.split('@')[1]
+    else:
+        domain = conf.get('kolab', 'primary_domain')
+
+    imap = IMAP()
+    imap.connect(domain=domain)
+
+    if not imap.has_folder(folder):
+        print >> sys.stderr, _("No such folder %r") % (folder)
+
+    else:
+        acls = []
+        folders = imap.lm(folder)
+        for folder in folders:
+            print "Folder", folder
+            acls = imap.list_acls(folder)
+
+            for acl in acls.keys():
+                print "  %-13s %s" %(acls[acl], acl)
 

@@ -137,16 +137,26 @@ class IMAP4(imaplib.IMAP4):
             return False, dat[0]
         return ok(res), dat[0]
 
-    def getannotation(self, mailbox, pattern='*'):
-        typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('value.shared'))
+    def getannotation(self, mailbox, pattern='*', shared=None):
+        if shared == None:
+            typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('*'))
+        elif shared:
+            typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('value.shared'))
+        else:
+            typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('value.priv'))
+
         return self._untagged_response(typ, dat, 'ANNOTATION')
 
-    def setannotation(self, mailbox, desc, value):
+    def setannotation(self, mailbox, desc, value, shared=False):
         if value:
             value = quote(value)
         else:
             value = "NIL"
-        typ, dat = self._simple_command('SETANNOTATION', mailbox, quote(desc), "(%s %s)" % (quote('value.shared'), value) )
+        if shared:
+            typ, dat = self._simple_command('SETANNOTATION', mailbox, quote(desc), "(%s %s)" % (quote('value.shared'), value) )
+        else:
+            typ, dat = self._simple_command('SETANNOTATION', mailbox, quote(desc), "(%s %s)" % (quote('value.priv'), value) )
+
         return self._untagged_response(typ, dat, 'ANNOTATION')
 
     def setquota(self, mailbox, limit):
@@ -208,16 +218,26 @@ class IMAP4_SSL(imaplib.IMAP4_SSL):
             return False, dat[0]
         return ok(res), dat[0]
 
-    def getannotation(self, mailbox, pattern='*'):
-        typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('value.shared'))
+    def getannotation(self, mailbox, pattern='*', shared=None):
+        if shared == None:
+            typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('*'))
+        elif shared:
+            typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('value.shared'))
+        else:
+            typ, dat = self._simple_command('GETANNOTATION', mailbox, quote(pattern), quote('value.priv'))
+
         return self._untagged_response(typ, dat, 'ANNOTATION')
 
-    def setannotation(self, mailbox, desc, value):
+    def setannotation(self, mailbox, desc, value, shared=False):
         if value:
             value = quote(value)
         else:
             value = "NIL"
-        typ, dat = self._simple_command('SETANNOTATION', mailbox, quote(desc), "(%s %s)" % (quote('value.shared'), value) )
+        if shared:
+            typ, dat = self._simple_command('SETANNOTATION', mailbox, quote(desc), "(%s %s)" % (quote('value.shared'), value) )
+        else:
+            typ, dat = self._simple_command('SETANNOTATION', mailbox, quote(desc), "(%s %s)" % (quote('value.priv'), value) )
+
         return self._untagged_response(typ, dat, 'ANNOTATION')
 
     def setquota(self, mailbox, limit):
@@ -572,11 +592,11 @@ class CYRUS:
         match = re_q0.match(msg[0])
         if match:
             self.__verbose( '[GETQUOTA %s] QUOTA (Unlimited)' % mailbox )
-            return 0, 0
+            return None, None
         match = re_q.match(msg[0])
         if match is None:
             self.__verbose( '[GETQUOTA %s] BAD: RegExp not matched, please report' % mailbox )
-            return 0, 0
+            return None, None
         try:
             used = int(match.group(2))
             quota = int(match.group(3))
@@ -584,7 +604,28 @@ class CYRUS:
             return used, quota
         except:
             self.__verbose( '[GETQUOTA %s] BAD: Error while parsing results' % mailbox )
-            return 0, 0
+            return None, None
+
+    def lqr(self, mailbox):
+        """List Quota Root"""
+        self.__prepare('GETQUOTAROOT', mailbox)
+        res, msg = self.__docommand("getquotaroot", self.decode(mailbox))
+        (_mailbox, _root) = msg[0][0].split()
+
+        match = re_q0.match(msg[1][0])
+        if match:
+            self.__verbose( '[GETQUOTAROOT %s] QUOTAROOT (Unlimited)' % mailbox )
+            return _root, None, None
+
+        match = re_q.match(msg[1][0])
+        try:
+            used = int(match.group(2))
+            quota = int(match.group(3))
+            self.__verbose( '[GETQUOTAROOT %s] %s: QUOTA (%d/%d)' % (mailbox, res, used, quota) )
+            return _root, used, quota
+        except:
+            self.__verbose( '[GETQUOTAROOT %s] BAD: Error while parsing results' % mailbox )
+            return _root, None, None
 
     def sq(self, mailbox, limit):
         """Set Quota"""
@@ -606,24 +647,49 @@ class CYRUS:
             return {}
         ann = {}
         for annotation in data:
+            self.__verbose( '[GETANNOTATION] RAW %r (length %d)' % (annotation,len(annotation)))
             annotation = annotation.split('"')
-            if len(annotation) != 9:
+            self.__verbose( '[GETANNOTATION] SPLIT %r (length %d)' % (annotation,len(annotation)))
+            if not len(annotation) in [ 9, 17, 21, 37 ]:
                 self.__verbose( '[GETANNOTATION] Invalid annotation entry' )
                 continue
             mbx = self.encode(annotation[1])
-            key = annotation[3]
+            _key = annotation[3]
+
+            if annotation[5] == "value.shared":
+                key = "/shared%s" % (_key)
+            elif annotation[5] == "value.priv":
+                key = "/private%s" % (_key)
+
             value = annotation[7]
+
             self.__verbose( '[GETANNOTATION %s] %s: %s' % (mbx, key, value) )
             if not ann.has_key(mbx):
                 ann[mbx] = {}
             if not ann[mbx].has_key(key):
                 ann[mbx][key] = value
+
+            if len(annotation) > 21:
+                # There's another one hidden in here.
+                if annotation[21] == "value.shared":
+                    key = "/shared%s" % (_key)
+                elif annotation[21] == "value.priv":
+                    key = "/private%s" % (_key)
+
+                value = annotation[23]
+
+                self.__verbose( '[GETANNOTATION %s] %s: %s' % (mbx, key, value) )
+                if not ann.has_key(mbx):
+                    ann[mbx] = {}
+                if not ann[mbx].has_key(key):
+                    ann[mbx][key] = value
+
         return ann
 
-    def setannotation(self, mailbox, annotation, value):
+    def setannotation(self, mailbox, annotation, value, shared=False):
         """Set Annotation"""
         self.__prepare('SETANNOTATION')
-        res, msg = self.__docommand("setannotation", self.decode(mailbox), annotation, value)
+        res, msg = self.__docommand("setannotation", self.decode(mailbox), annotation, value, shared)
         self.__verbose( '[SETANNOTATION %s] %s: %s' % (mailbox, res, msg[0]) )
 
     def __reconstruct(self, mailbox):

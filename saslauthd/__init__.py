@@ -35,6 +35,7 @@ import traceback
 
 import pykolab
 
+from pykolab import utils
 from pykolab.auth import Auth
 from pykolab.constants import *
 from pykolab.translate import _
@@ -46,19 +47,50 @@ class SASLAuthDaemon(object):
     def __init__(self):
         daemon_group = conf.add_cli_parser_option_group(_("Daemon Options"))
 
-        daemon_group.add_option(  "--fork",
-                                dest    = "fork_mode",
-                                action  = "store_true",
-                                default = False,
-                                help    = _("Fork to the background."))
+        daemon_group.add_option(
+                "--fork",
+                dest    = "fork_mode",
+                action  = "store_true",
+                default = False,
+                help    = _("Fork to the background.")
+            )
 
-        daemon_group.add_option( "-p", "--pid-file",
-                                dest    = "pidfile",
-                                action  = "store",
-                                default = "/var/run/kolab-saslauthd/kolab-saslauthd.pid",
-                                help    = _("Path to the PID file to use."))
+        daemon_group.add_option(
+                "-p",
+                "--pid-file",
+                dest    = "pidfile",
+                action  = "store",
+                default = "/var/run/kolab-saslauthd/kolab-saslauthd.pid",
+                help    = _("Path to the PID file to use.")
+            )
+
+        daemon_group.add_option(
+                "-u",
+                "--user",
+                dest    = "process_username",
+                action  = "store",
+                default = "kolab",
+                help    = _("Run as user USERNAME"),
+                metavar = "USERNAME"
+            )
+
+        daemon_group.add_option(
+                "-g",
+                "--group",
+                dest    = "process_groupname",
+                action  = "store",
+                default = "kolab",
+                help    = _("Run as group GROUPNAME"),
+                metavar = "GROUPNAME"
+            )
 
         conf.finalize_conf()
+
+        utils.ensure_directory(
+                os.path.dirname(conf.pidfile),
+                conf.process_username,
+                conf.process_groupname
+            )
 
         self.thread_count = 0
 
@@ -115,6 +147,12 @@ class SASLAuthDaemon(object):
         import struct
 
         s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+
+        utils.ensure_directory(
+                '/var/run/saslauthd/',
+                conf.process_username,
+                conf.process_groupname
+            )
 
         # TODO: The saslauthd socket path could be a setting.
         try:

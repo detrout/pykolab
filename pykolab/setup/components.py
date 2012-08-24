@@ -32,7 +32,9 @@ components = {}
 component_groups = {}
 executed_components = []
 
-executed_components = []
+components_included_in_cli = []
+
+finalize_conf_ok = None
 
 def __init__():
     # We only want the base path
@@ -116,8 +118,33 @@ def _list_components(*args, **kw):
 
     return _components
 
+def cli_options_from_component(component_name, *args, **kw):
+    global components_included_in_cli
+
+    if component_name in components_included_in_cli:
+        return
+
+    if components[component_name].has_key('group'):
+        group = components[component_name]['group']
+        component_name = components[component_name]['component_name']
+        try:
+            exec("from %s.setup_%s import cli_options as %s_%s_cli_options" % (group,component_name,group,component_name))
+            exec("%s_%s_cli_options()" % (group,component_name))
+        except ImportError, e:
+            pass
+
+    else:
+        try:
+            exec("from setup_%s import cli_options as %s_cli_options" % (component_name,component_name))
+            exec("%s_cli_options()" % (component_name))
+        except ImportError, e:
+            pass
+
+    components_included_in_cli.append(component_name)
+
 def execute(component_name, *args, **kw):
     if component_name == '':
+
         log.debug(
                 _("No component selected, continuing for all components"),
                 level=8
@@ -152,6 +179,9 @@ def execute(component_name, *args, **kw):
                 break
 
         return
+    else:
+        for component in _list_components():
+            cli_options_from_component(component)
 
     if not components.has_key(component_name):
         log.error(_("No such component."))
@@ -161,22 +191,6 @@ def execute(component_name, *args, **kw):
         not components[component_name].has_key('group'):
         log.error(_("No such component."))
         sys.exit(1)
-
-    if components[component_name].has_key('group'):
-        group = components[component_name]['group']
-        component_name = components[component_name]['component_name']
-        try:
-            exec("from %s.setup_%s import cli_options as %s_%s_cli_options" % (group,component_name,group,component_name))
-            exec("%s_%s_cli_options()" % (group,component_name))
-        except ImportError, e:
-            pass
-
-    else:
-        try:
-            exec("from setup_%s import cli_options as %s_cli_options" % (component_name,component_name))
-            exec("%s_cli_options()" % (component_name))
-        except ImportError, e:
-            pass
 
     conf.finalize_conf()
 

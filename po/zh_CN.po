@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pykolab 0.4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-09 14:27+0100\n"
-"PO-Revision-Date: 2012-05-09 14:26+0100\n"
+"POT-Creation-Date: 2012-05-09 14:25+0100\n"
+"PO-Revision-Date: 2012-05-09 14:25+0100\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: zh_CN\n"
@@ -454,8 +454,8 @@ msgstr ""
 msgid "Traceback occurred, please report a bug at http://bugzilla.kolabsys.com"
 msgstr ""
 
-#: .././kolabd/__init__.py:116 .././pykolab/auth/ldap/__init__.py:1281
-#: .././pykolab/cli/cmd_sync.py:36
+#: .././kolabd/__init__.py:116 .././pykolab/auth/ldap/__init__.py:1291
+#: .././pykolab/cli/cmd_sync.py:33
 msgid "Listing domains..."
 msgstr ""
 
@@ -530,9 +530,28 @@ msgstr ""
 msgid "Called for domain %r"
 msgstr ""
 
-#: .././pykolab/auth/__init__.py:110
+#: .././pykolab/auth/__init__.py:107 .././pykolab/auth/__init__.py:116
+#, python-format
+msgid "Using section %s and domain %s"
+msgstr ""
+
+#: .././pykolab/auth/__init__.py:121
 #, python-format
 msgid "Connecting to Authentication backend for domain %s"
+msgstr ""
+
+#: .././pykolab/auth/__init__.py:132
+#, python-format
+msgid "Section %s has no option 'auth_mechanism'"
+msgstr ""
+
+#: .././pykolab/auth/__init__.py:139
+#, python-format
+msgid "Section %s has auth_mechanism: %r"
+msgstr ""
+
+#: .././pykolab/auth/__init__.py:148 .././pykolab/auth/__init__.py:157
+msgid "Starting LDAP..."
 msgstr ""
 
 #: .././pykolab/auth/ldap/__init__.py:51
@@ -568,151 +587,151 @@ msgstr ""
 msgid "Finding recipient with filter %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:390
+#: .././pykolab/auth/ldap/__init__.py:398
 #, python-format
 msgid "Applying recipient policy to %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:409
+#: .././pykolab/auth/ldap/__init__.py:415
 #, python-format
 msgid "Using mail attributes: %r, with primary %r and "
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:420
+#: .././pykolab/auth/ldap/__init__.py:426
 #, python-format
 msgid "key %r not in entry"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:422
+#: .././pykolab/auth/ldap/__init__.py:428
 #, python-format
 msgid "key %r is the prim. mail attr."
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:424
+#: .././pykolab/auth/ldap/__init__.py:430
 msgid "prim. mail pol. is not empty"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:427
+#: .././pykolab/auth/ldap/__init__.py:433
 #, python-format
 msgid "key %r is the sec. mail attr."
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:429
+#: .././pykolab/auth/ldap/__init__.py:435
 msgid "sec. mail pol. is not empty"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:432
-#: .././pykolab/auth/ldap/__init__.py:445
+#: .././pykolab/auth/ldap/__init__.py:438
+#: .././pykolab/auth/ldap/__init__.py:451
 #, python-format
 msgid "Attributes %r are not yet available for entry %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:483
+#: .././pykolab/auth/ldap/__init__.py:492
 #, python-format
 msgid "No results for mail address %s found"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:494
+#: .././pykolab/auth/ldap/__init__.py:503
 #, python-format
 msgid "1 result for address %s found, verifying"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:504
+#: .././pykolab/auth/ldap/__init__.py:513
 #, python-format
 msgid "Too bad, primary email address %s "
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:515
-#: .././pykolab/auth/ldap/__init__.py:604
+#: .././pykolab/auth/ldap/__init__.py:524
+#: .././pykolab/auth/ldap/__init__.py:613
 msgid "Address assigned to us"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:570
+#: .././pykolab/auth/ldap/__init__.py:579
 #, python-format
 msgid "No results for address %s found"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:581
+#: .././pykolab/auth/ldap/__init__.py:590
 #, python-format
 msgid "1 result for address %s found, "
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:592
+#: .././pykolab/auth/ldap/__init__.py:601
 msgid "Too bad, secondary email "
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:646
+#: .././pykolab/auth/ldap/__init__.py:655
 #, python-format
 msgid "Entry modifications list: %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:688
+#: .././pykolab/auth/ldap/__init__.py:698
 #, python-format
 msgid "Using filter %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:726
+#: .././pykolab/auth/ldap/__init__.py:736
 msgid "Invalid bind credentials"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:979
+#: .././pykolab/auth/ldap/__init__.py:989
 #, python-format
 msgid "Current changelog entry %s with %s"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:986
+#: .././pykolab/auth/ldap/__init__.py:996
 #, python-format
 msgid "Result from recipient policy: %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1217
+#: .././pykolab/auth/ldap/__init__.py:1227
 #, python-format
 msgid "Finding domain root dn for domain %s"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1305
+#: .././pykolab/auth/ldap/__init__.py:1315
 msgid "Authentication database DOWN"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1366
+#: .././pykolab/auth/ldap/__init__.py:1394
 #, python-format
 msgid "Entry type: %s"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1439
+#: .././pykolab/auth/ldap/__init__.py:1492
 msgid "LDAP Search Result Data Entry:"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1455
+#: .././pykolab/auth/ldap/__init__.py:1508
 msgid "Entry Change Notification attributes:"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1460
+#: .././pykolab/auth/ldap/__init__.py:1513
 #, python-format
 msgid "Change Type: %r (%r)"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1468
+#: .././pykolab/auth/ldap/__init__.py:1521
 #, python-format
 msgid "Previous DN: %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1522
+#: .././pykolab/auth/ldap/__init__.py:1575
 #, python-format
 msgid "Object %s searched no longer exists"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1534
+#: .././pykolab/auth/ldap/__init__.py:1583
 #, python-format
 msgid "%d results..."
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1624
+#: .././pykolab/auth/ldap/__init__.py:1677
 #, python-format
 msgid "Searching with filter %r"
 msgstr ""
 
-#: .././pykolab/auth/ldap/__init__.py:1668
+#: .././pykolab/auth/ldap/__init__.py:1721
 #, python-format
 msgid "Checking for support for %s on %s"
 msgstr ""
@@ -952,39 +971,39 @@ msgstr ""
 msgid "OpenLDAP or compatible"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_list_sessions.py:38
+#: .././pykolab/cli/telemetry/cmd_list_sessions.py:35
 msgid "List Options"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_list_sessions.py:43
+#: .././pykolab/cli/telemetry/cmd_list_sessions.py:40
 msgid "Display sessions since ..."
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_list_sessions.py:61
+#: .././pykolab/cli/telemetry/cmd_list_sessions.py:58
 #, python-format
 msgid "Session for user %s started at %s with ID %s"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_examine_session.py:46
+#: .././pykolab/cli/telemetry/cmd_examine_session.py:43
 msgid "Unspecified session identifier"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_examine_session.py:68
-#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:63
+#: .././pykolab/cli/telemetry/cmd_examine_session.py:65
+#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:60
 msgid "Invalid session identifier"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_examine_session.py:103
-#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:78
+#: .././pykolab/cli/telemetry/cmd_examine_session.py:100
+#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:75
 #, python-format
 msgid "Session by %s on server %s"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:43
+#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:40
 msgid "Unspecified command issue identifier"
 msgstr ""
 
-#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:53
+#: .././pykolab/cli/telemetry/cmd_examine_command_issue.py:50
 msgid "Invalid command issue identifier"
 msgstr ""
 
@@ -1004,49 +1023,49 @@ msgstr ""
 msgid "Command '%s' already registered"
 msgstr ""
 
-#: .././pykolab/cli/cmd_delete_mailbox.py:46
+#: .././pykolab/cli/cmd_delete_mailbox.py:43
 msgid "No mailbox specified"
 msgstr ""
 
-#: .././pykolab/cli/cmd_list_mailboxes.py:38
-#: .././pykolab/cli/cmd_export_mailbox.py:36
+#: .././pykolab/cli/cmd_list_mailboxes.py:35
+#: .././pykolab/cli/cmd_export_mailbox.py:33
 msgid "CLI Options"
 msgstr ""
 
-#: .././pykolab/cli/cmd_list_mailboxes.py:43
+#: .././pykolab/cli/cmd_list_mailboxes.py:40
 msgid "Display raw UTF-7 folder names"
 msgstr ""
 
-#: .././pykolab/cli/cmd_export_mailbox.py:41
+#: .././pykolab/cli/cmd_export_mailbox.py:38
 msgid "All folders this user has access to"
 msgstr ""
 
-#: .././pykolab/cli/cmd_export_mailbox.py:111
+#: .././pykolab/cli/cmd_export_mailbox.py:108
 #, python-format
 msgid "%s is not a directory"
 msgstr ""
 
-#: .././pykolab/cli/cmd_export_mailbox.py:121
+#: .././pykolab/cli/cmd_export_mailbox.py:118
 #, python-format
 msgid "ZIP file at %s.zip"
 msgstr ""
 
-#: .././pykolab/cli/cmd_export_mailbox.py:123
+#: .././pykolab/cli/cmd_export_mailbox.py:120
 #, python-format
 msgid "No directories found for user %s"
 msgstr ""
 
-#: .././pykolab/cli/cmd_sync.py:41
+#: .././pykolab/cli/cmd_sync.py:38
 #, python-format
 msgid "Found %d domains in %d seconds"
 msgstr ""
 
-#: .././pykolab/cli/cmd_sync.py:51
+#: .././pykolab/cli/cmd_sync.py:48
 #, python-format
 msgid "Running for domain %s"
 msgstr ""
 
-#: .././pykolab/cli/cmd_sync.py:57
+#: .././pykolab/cli/cmd_sync.py:54
 #, python-format
 msgid "Synchronizing users for %s took %d seconds"
 msgstr ""

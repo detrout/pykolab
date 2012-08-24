@@ -290,7 +290,7 @@ class Conf(object):
         runtime_group.add_option(   "--logfile",
                                     dest    = "logfile",
                                     action  = "store",
-                                    default = "/var/log/kolabd/kolabd.log",
+                                    default = "/var/log/kolab/pykolab.log",
                                     help    = _("Log file to use"))
 
         runtime_group.add_option(   "-q", "--quiet",
@@ -528,10 +528,10 @@ class Conf(object):
                     return _dict[key]
                 else:
                     log.warning(_("Option does not exist in defaults."))
-                    return _("Not available")
+                    return None
             else:
                 log.warning(_("Option does not exist in defaults."))
-                return _("Not available")
+                return None
 
     def check_setting_config_file(self, value):
         if os.path.isfile(value):

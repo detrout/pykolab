@@ -49,6 +49,8 @@ def execute(*args, **kw):
     if user_filter == None:
         user_filter = conf.get('ldap','user_filter')
 
+    resource_filter = conf.get('ldap', 'resource_filter')
+
     files = {
             "/etc/postfix/ldap/local_recipient_maps.cf": """
 server_host = localhost
@@ -62,7 +64,7 @@ domain = ldap:/etc/postfix/ldap/mydestination.cf
 bind_dn = %(service_bind_dn)s
 bind_pw = %(service_bind_pw)s
 
-query_filter = (&(|(mail=%%s)(alias=%%s))(|%(kolab_user_filter)s%(kolab_group_filter)s))
+query_filter = (&(|(mail=%%s)(alias=%%s))(|%(kolab_user_filter)s%(kolab_group_filter)s%(resource_filter)s))
 result_attribute = mail
 """ % {
                         "base_dn": conf.get('ldap', 'base_dn'),
@@ -70,6 +72,7 @@ result_attribute = mail
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                         "kolab_user_filter": user_filter,
                         "kolab_group_filter": group_filter,
+                        "resource_filter": resource_filter,
                     },
             "/etc/postfix/ldap/mydestination.cf": """
 server_host = localhost
@@ -249,6 +252,9 @@ result_attribute = mail
         log.error(_("Could not write out Postfix configuration file /etc/postfix/master.cf"))
         return
 
+    if os.path.isfile('/etc/pki/tls/certs/make-dummy-cert') and not os.path.isfile('/etc/pki/tls/private/localhost.pem'):
+        subprocess.call(['/etc/pki/tls/certs/make-dummy-cert', '/etc/pki/tls/private/localhost.pem'])
+
     amavisd_settings = {
             'ldap_server': 'localhost',
             'ldap_bind_dn': conf.get('ldap', 'service_bind_dn'),
@@ -288,6 +294,8 @@ result_attribute = mail
         subprocess.call(['systemctl', 'enable', 'amavisd.service'])
         subprocess.call(['systemctl', 'restart', 'clamd.amavisd.service'])
         subprocess.call(['systemctl', 'enable', 'clamd.amavisd.service'])
+        subprocess.call(['systemctl', 'restart', 'wallace.service'])
+        subprocess.call(['systemctl', 'enable', 'wallace.service'])
     elif os.path.isfile('/sbin/service'):
         subprocess.call(['service', 'postfix', 'restart'])
         subprocess.call(['chkconfig', 'postfix', 'on'])
@@ -295,6 +303,8 @@ result_attribute = mail
         subprocess.call(['chkconfig', 'amavisd', 'on'])
         subprocess.call(['service', 'clamd.amavisd', 'restart'])
         subprocess.call(['chkconfig', 'clamd.amavisd', 'on'])
+        subprocess.call(['service', 'wallace', 'restart'])
+        subprocess.call(['chkconfig', 'wallace', 'on'])
     else:
         log.error(_("Could not start and configure to start on boot, the " + \
                 "postfix, clamav.amavisd and amavisd services."))

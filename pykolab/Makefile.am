@@ -57,6 +57,7 @@ pykolab_setup_PYTHON = \
 	setup/setup_ldap.py \
 	setup/setup_mta.py \
 	setup/setup_mysql.py \
+	setup/setup_php.py \
 	setup/setup_roundcube.py \
 	setup/setup_zpush.py \
 	setup/__init__.py
@@ -64,3 +65,7 @@ pykolab_setup_PYTHON = \
 pykolab_wapclientdir = $(pythondir)/$(PACKAGE)/wap_client
 pykolab_wapclient_PYTHON = \
 	$(wildcard wap_client/*.py)
+
+pykolab_xmldir = $(pythondir)/$(PACKAGE)/xml
+pykolab_xml_PYTHON = \
+	$(wildcard xml/*.py)

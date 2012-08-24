@@ -31,6 +31,9 @@ EXTRA_DIST = \
 	pykolab.spec \
 	pykolab.spec.in \
 	pylint.log \
+	$(wildcard tests/*.py) \
+	$(wildcard tests/*/*.py) \
+	$(wildcard tests/*/*/*.py) \
 	$(PYTHON_FILES)
 
 SUBDIRS = \
@@ -169,6 +172,9 @@ binary:
 		kolabd.py
 	cd src/kolabd/; $(MAKE)
 
+check:
+	nosetests -v tests/
+
 clean:
 	rm -rf src/*; mkdir -p src/
 	find -type f -name "*.pyo" -o -name "*.pyc" -delete
@@ -181,7 +187,9 @@ install-exec-local:
 		$(DESTDIR)/$(sysconfdir)/kolab \
 		$(DESTDIR)/$(libexecdir)/postfix \
 		$(DESTDIR)/$(localstatedir)/lib/kolab \
-		$(DESTDIR)/$(localstatedir)/log/kolab
+		$(DESTDIR)/$(localstatedir)/log/kolab \
+		$(DESTDIR)/$(localstatedir)/spool/pykolab/wallace
+
 if ENTERPRISE
 	mkdir -p $(DESTDIR)/$(sysconfdir)/kolab/entitlement.d
 endif

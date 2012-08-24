@@ -212,23 +212,133 @@ class IMAP(object):
         else:
             raise AttributeError, _("%r has no attribute %s") % (self,name)
 
+    def get_metadata(self, folder):
+        """
+            Obtain all metadata entries on a folder
+        """
+
+        return self.imap.getannotation(folder, '*')
+
+    def namespaces(self):
+        """
+            Obtain the namespaces.
+
+            Returns a tuple of:
+
+                (str(personal) [, str(other users) [, list(shared)]])
+        """
+
+        _personal = None
+        _other_users = None
+        _shared = None
+
+        (_response, _namespaces) = self.imap.m.namespace()
+
+        if len(_namespaces) == 1:
+            _namespaces = _namespaces[0]
+
+        _namespaces = re.split(r"\)\)\s\(\(", _namespaces)
+
+        _other_users = [
+                ''.join(_namespaces[1].replace('((','').replace('))','').split()[-1])
+            ]
+
+        if len(_namespaces) >= 3:
+            _shared = []
+            _shared.append(' '.join(_namespaces[2].replace('((','').replace('))','').split()[:-1]))
+
+        if len(_namespaces) >= 2:
+            _other_users = ' '.join(_namespaces[1].replace('((','').replace('))','').split()[:-1])
+
+        if len(_namespaces) >= 1:
+            _personal = _namespaces[0].replace('((','').replace('))','').split()[0]
+
+        return (_personal, _other_users, _shared)
+
+    def set_acl(self, folder, identifier, acl):
+        """
+            Set an ACL entry on a folder.
+        """
+
+        self.imap.sam(folder, identifier, acl)
+
+    def set_metadata(self, folder, metadata_path, metadata_value, shared=True):
+        """
+            Set a metadata entry on a folder
+        """
+
+        if metadata_path.startswith('/shared/'):
+            shared = True
+
+        if metadata_path.startswith('/shared/'):
+            metadata_path = metadata_path.replace('/shared/', '/')
+        elif metadata_path.startswith('/private/'):
+            shared = False
+            metadata_path = metadata_path.replace('/private/', '/')
+
+        backend = conf.get('kolab', 'imap_backend')
+
+        if not self.domain == None:
+            if conf.has_section(self.domain) and conf.has_option(self.domain, 'imap_backend'):
+                backend = conf.get(self.domain, 'imap_backend')
+
+        if not shared:
+            log.warning(_("Private annotations need to be set using the appropriate user account."))
+
+        admin_login = conf.get(backend, 'admin_login')
+
+        admin_acl = None
+
+        acls = self.list_acls(folder)
+        if acls.has_key(admin_login):
+            admin_acl = acls[admin_login]
+
+        if admin_acl == None:
+            self.set_acl(folder, admin_login, 'lrsipwa')
+        elif not 'w' in admin_acl:
+            self.set_acl(folder, admin_login, '%sw' % (admin_acl))
+
+        self.imap._setannotation(folder, metadata_path, metadata_value, shared)
+
+        if admin_acl == None:
+            self.set_acl(folder, admin_login, '')
+        elif not 'w' in admin_acl:
+            self.set_acl(folder, admin_login, admin_acl)
+
     def shared_folder_create(self, folder_path, server=None):
         """
             Create a shared folder.
         """
 
         folder_name = "shared%s%s" % (self.imap.separator, folder_path)
-        log.info(_("Creating new shared folder %s") %(folder_path))
+
+        # Correct folder_path being supplied with "shared/shared/" for example
+        if folder_name.startswith("shared%s" % (self.imap.separator) * 2):
+            folder_name = folder_name[7:]
+
+        log.info(_("Creating new shared folder %s") %(folder_name))
         self.create_folder(folder_name, server)
 
     def shared_folder_exists(self, folder_path):
         """
             Check if a shared mailbox exists.
         """
-        return self.has_folder('shared%s%s' % (self.imap.separator, folder_path))
+        folder_name = 'shared%s%s' % (self.imap.separator, folder_path)
+
+        # Correct folder_path being supplied with "shared/shared/" for example
+        if folder_name.startswith("shared%s" % (self.imap.separator) * 2):
+            folder_name = folder_name[7:]
+
+        return self.has_folder(folder_name)
 
     def shared_folder_set_type(self, folder_path, folder_type):
-        self.imap._setannotation('shared%s%s' % (self.imap.separator, folder_path), '/vendor/kolab/folder-type', folder_type)
+        folder_name = 'shared%s%s' % (self.imap.separator, folder_path)
+
+        # Correct folder_path being supplied with "shared/shared/" for example
+        if folder_name.startswith("shared%s" % (self.imap.separator) * 2):
+            folder_name = folder_name[7:]
+
+        self.imap._setannotation(folder_name, '/vendor/kolab/folder-type', folder_type)
 
     def shared_mailbox_create(self, mailbox_base_name, server=None):
         """
@@ -236,6 +346,11 @@ class IMAP(object):
         """
 
         folder_name = "shared%s%s" % (self.imap.separator, mailbox_base_name)
+
+        # Correct folder_path being supplied with "shared/shared/" for example
+        if folder_name.startswith("shared%s" % (self.imap.separator) * 2):
+            folder_name = folder_name[7:]
+
         log.info(_("Creating new shared folder %s") %(mailbox_base_name))
         self.create_folder(folder_name, server)
 
@@ -243,7 +358,13 @@ class IMAP(object):
         """
             Check if a shared mailbox exists.
         """
-        return self.has_folder('shared%s%s' %(self.imap.separator, mailbox_base_name))
+        folder_name = "shared%s%s" % (self.imap.separator, mailbox_base_name)
+
+        # Correct folder_path being supplied with "shared/shared/" for example
+        if folder_name.startswith("shared%s" % (self.imap.separator) * 2):
+            folder_name = folder_name[7:]
+
+        return self.has_folder(folder_name)
 
     def user_mailbox_create(self, mailbox_base_name, server=None):
         """
@@ -272,12 +393,18 @@ class IMAP(object):
                         )
 
                     if not additional_folders == None:
-                        self.user_mailbox_create_additional_folders(mailbox_base_name, additional_folders)
+                        self.user_mailbox_create_additional_folders(
+                                mailbox_base_name,
+                                additional_folders
+                            )
 
         return folder_name
 
     def user_mailbox_create_additional_folders(self, folder, additional_folders):
-        log.debug(_("Creating additional folders for user %s") % (folder), level=8)
+        log.debug(
+                _("Creating additional folders for user %s") % (folder),
+                level=8
+            )
 
         for additional_folder in additional_folders.keys():
             _add_folder = {}
@@ -350,8 +477,30 @@ class IMAP(object):
         self.connect(login=False)
         self.login_plain(admin_login, admin_password, folder)
 
-        for _folder in self.lm("%s/*%s" % (folder_name.split('@')[0],domain_suffix)):
-            self.subscribe(_folder)
+        _tests = []
+
+        # Subscribe only to personal folders
+        (personal, other, shared) = self.namespaces()
+
+        if not other == None:
+            _tests.append(other)
+
+        if not shared == None:
+            for _shared in shared:
+                _tests.append(_shared)
+
+        for _folder in self.lm():
+            _subscribe = True
+
+            for _test in _tests:
+                if not _subscribe:
+                    continue
+
+                if _folder.startswith(_test):
+                    _subscribe = False
+
+            if _subscribe:
+                self.subscribe(_folder)
 
         self.logout()
 
@@ -369,6 +518,9 @@ class IMAP(object):
         """
         return self.has_folder('user%s%s' %(self.imap.separator, mailbox_base_name))
 
+    def user_mailbox_quota(self, mailbox_quota):
+        pass
+
     def user_mailbox_rename(self, old_name, new_name):
         old_name = "user%s%s" % (self.imap.separator,old_name)
         new_name = "user%s%s" % (self.imap.separator,new_name)
@@ -381,7 +533,7 @@ class IMAP(object):
             try:
                 self.imap.rename(old_name,new_name)
             except:
-                log.error(_("Could not rename INBOX folder %s to %s") % (oldname,new_name))
+                log.error(_("Could not rename INBOX folder %s to %s") % (old_name,new_name))
         else:
             log.warning(_("Moving INBOX folder %s won't succeed as target folder %s already exists") % (old_name,new_name))
 
@@ -465,6 +617,9 @@ class IMAP(object):
                         log.debug(_("Did not find old folder user/%s to rename") % (user['old_mail']), level=8)
             else:
                 log.debug(_("Value for user is not a dictionary"), level=8)
+
+    def set_quota(self, folder, quota):
+        self.imap._setquota(folder, quota)
 
     def set_user_folder_quota(self, users=[], primary_domain=None, secondary_domain=[], folders=[]):
         """
@@ -660,6 +815,21 @@ class IMAP(object):
 
         self.imap.dm(mailfolder_path)
 
+    def get_quota(self, mailfolder_path):
+        try:
+            return self.lq(mailfolder_path)
+        except:
+            return
+
+    def get_quota_root(self, mailfolder_path):
+        return self.lqr(mailfolder_path)
+
+    def list_acls(self, folder):
+        """
+            List the ACL entries on a folder
+        """
+        return self.imap.lam(folder)
+
     def list_user_folders(self, primary_domain=None, secondary_domains=[]):
         """
             List the INBOX folders in the IMAP backend. Returns a list of unique
@@ -706,20 +876,14 @@ class IMAP(object):
 
         return folders
 
-    def synchronize(self, users=[], primary_domain=None, secondary_domains=[]):
-        self.connect(domain=primary_domain)
-        self.users.extend(users)
-
-        self.move_user_folders(users, domain=primary_domain)
-
-        self.inbox_folders.extend(self.create_user_folders(users, primary_domain, secondary_domains))
-
-        self.set_user_folder_quota(users, primary_domain, secondary_domains, self.inbox_folders)
-
-        self.set_user_mailhost(users, primary_domain, secondary_domains, self.inbox_folders)
-
     def lm(self, *args, **kw):
         return self.imap.lm(*args, **kw)
+
+    def lq(self, *args, **kw):
+        return self.imap.lq(*args, **kw)
+
+    def lqr(self, *args, **kw):
+        return self.imap.lqr(*args, **kw)
 
     def undelete_mailfolder(self, *args, **kw):
         self.imap.undelete_mailfolder(*args, **kw)

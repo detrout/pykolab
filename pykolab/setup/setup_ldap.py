@@ -50,6 +50,14 @@ def cli_options():
             help    = _("Specify FQDN (overriding defaults).")
         )
 
+    ldap_group.add_option(
+            "--allow-anonymous",
+            dest    = "anonymous",
+            action  = "store_true",
+            default = False,
+            help    = _("Allow anonymous binds (default: no).")
+        )
+
 def description():
     return _("Setup LDAP.")
 
@@ -93,6 +101,14 @@ def execute(*args, **kw):
                 confirm=True
             )
 
+        print >> sys.stderr, utils.multiline_message(
+                _("""
+                        Please choose the system user and group the service
+                        should use to run under. These should be existing,
+                        unprivileged, local system POSIX accounts with no shell.
+                    """)
+            )
+
         _input['userid'] = utils.ask_question(_("User"), default="nobody")
         _input['group'] = utils.ask_question(_("Group"), default="nobody")
 
@@ -101,6 +117,8 @@ def execute(*args, **kw):
         _input['dirmgr_pass'] = conf.get('ldap', 'bind_pw')
         _input['userid'] = "nobody"
         _input['group'] = "nobody"
+
+    # TODO: Verify the user and group exist.
 
     # TODO: This takes the system fqdn, domainname and hostname, rather then
     # the desired fqdn, domainname and hostname.
@@ -171,6 +189,8 @@ def execute(*args, **kw):
                                 """)
                         )
 
+    # TODO: Loudly complain if the fqdn does not resolve back to this system.
+
     data = """
 [General]
 FullMachineName = %(fqdn)s
@@ -210,6 +230,14 @@ ServerAdminPwd = %(admin_pass)s
             '--file=%s' % (filename)
         ]
 
+    print >> sys.stderr, utils.multiline_message(
+            _("""
+                    Setup is now going to set up the 389 Directory Server. This
+                    may take a little while (during which period there is no
+                    output and no progress indication).
+                """)
+        )
+
     log.info(_("Setting up 389 Directory Server"))
 
     setup_389 = subprocess.Popen(
@@ -219,6 +247,8 @@ ServerAdminPwd = %(admin_pass)s
         )
 
     (stdoutdata, stderrdata) = setup_389.communicate()
+
+    # TODO: Get the return code and display output if not successful.
 
     log.debug(_("Setup DS stdout:"), level=8)
     log.debug(stdoutdata, level=8)
@@ -347,6 +377,36 @@ ServerAdminPwd = %(admin_pass)s
     attrs['surname'] = "Service"
     attrs['cn'] = "Kolab Service"
     attrs['userPassword'] = _input['kolab_service_pass']
+    attrs['nslookthroughlimit'] = '-1'
+    attrs['nssizelimit'] = '-1'
+    attrs['nstimelimit'] = '-1'
+    attrs['nsidletimeout'] = '-1'
+
+    # Convert our dict to nice syntax for the add-function using modlist-module
+    ldif = ldap.modlist.addModlist(attrs)
+
+    # Do the actual synchronous add-operation to the ldapserver
+    auth._auth.ldap.add_s(dn, ldif)
+
+    dn = 'ou=Resources,%s' % (_input['rootdn'])
+
+    # A dict to help build the "body" of the object
+    attrs = {}
+    attrs['objectclass'] = ['top','organizationalunit']
+    attrs['ou'] = "Resources"
+
+    # Convert our dict to nice syntax for the add-function using modlist-module
+    ldif = ldap.modlist.addModlist(attrs)
+
+    # Do the actual synchronous add-operation to the ldapserver
+    auth._auth.ldap.add_s(dn, ldif)
+
+    dn = 'ou=Shared Folders,%s' % (_input['rootdn'])
+
+    # A dict to help build the "body" of the object
+    attrs = {}
+    attrs['objectclass'] = ['top','organizationalunit']
+    attrs['ou'] = "Shared Folders"
 
     # Convert our dict to nice syntax for the add-function using modlist-module
     ldif = ldap.modlist.addModlist(attrs)
@@ -383,6 +443,7 @@ ServerAdminPwd = %(admin_pass)s
     attrs = {}
     attrs['objectclass'] = ['top','domainrelatedobject']
     attrs['associateddomain'] = '%s' % (_input['domain'])
+    attrs['aci'] = '(targetattr = "*") (version 3.0;acl "Read Access for %(domain)s Users";allow (read,compare,search)(userdn = "ldap:///%(rootdn)s??sub?(objectclass=*)");)' % (_input)
 
     # Add inetdomainbasedn in case the configured root dn is not the same as the
     # standard root dn for the domain name configured
@@ -392,11 +453,12 @@ ServerAdminPwd = %(admin_pass)s
     ldif = ldap.modlist.addModlist(attrs)
     auth._auth.ldap.add_s(dn, ldif)
 
-    log.info(_("Disabling anonymous binds"))
-    dn = "cn=config"
-    modlist = []
-    modlist.append((ldap.MOD_REPLACE, "nsslapd-allow-anonymous-access", "off"))
-    auth._auth.ldap.modify_s(dn, modlist)
+    if not conf.anonymous:
+        log.info(_("Disabling anonymous binds"))
+        dn = "cn=config"
+        modlist = []
+        modlist.append((ldap.MOD_REPLACE, "nsslapd-allow-anonymous-access", "off"))
+        auth._auth.ldap.modify_s(dn, modlist)
 
     # TODO: Ensure the uid attribute is unique
     # TODO^2: Consider renaming the general "attribute uniqueness to "uid attribute uniqueness"

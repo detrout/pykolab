@@ -20,7 +20,9 @@
     The Kolab daemon.
 """
 
+import grp
 import os
+import pwd
 import shutil
 import sys
 import time
@@ -30,6 +32,7 @@ import pykolab
 
 from pykolab.auth import Auth
 from pykolab import constants
+from pykolab import utils
 from pykolab.translate import _
 
 from process import KolabdProcess as Process
@@ -88,6 +91,12 @@ class KolabDaemon(object):
         """Run Forest, RUN!"""
 
         exitcode = 0
+
+        utils.ensure_directory(
+                os.path.dirname(conf.pidfile),
+                conf.process_username,
+                conf.process_groupname
+            )
 
         try:
             try:
@@ -243,7 +252,13 @@ class KolabDaemon(object):
             if len(removed_domains) == 0 and len(added_domains) == 0:
                 time.sleep(600)
 
-            log.debug(_("added domains: %r, removed domains: %r") % (added_domains, removed_domains), level=8)
+            log.debug(
+                    _("added domains: %r, removed domains: %r") % (
+                            added_domains,
+                            removed_domains
+                        ),
+                    level=8
+                )
 
             for domain in added_domains:
                 domain_auth[domain] = Process(domain)
