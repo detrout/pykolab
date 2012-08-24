@@ -1,42 +1,15 @@
 Source: pykolab
 Section: python
-Priority: optional
+Priority:  optional
 Maintainer: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
-Standards-Version: 3.9.1
-Build-Depends: debhelper (>= 8), intltool
+Build-Depends: debhelper (>= 7.0.50~), python (>= 2.6~), python-dev (>= 2.6~), libunistring0, libglib2.0-0, libcroco3, python2.6, libxml-parser-perl, mime-support, gettext, python-minimal, libexpat1, python-support, libxml2, libpcre3, libssl0.9.8, gawk
+Standards-Version: 3.8.4
 Homepage: http://www.kolab.org
-Vcs-Browser: http://git.kolabsys.com/apt/pykolab
-Vcs-Git: git://git.kolabsys.com/git/apt/pykolab
-X-Python-Version: >= 2.4
+Vcs-Git: git://git.kolab.org/git/pykolab
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/pykolab.git;a=summary
 
 Package: pykolab
 Architecture: all
-Depends: python, ${misc:Depends}
-Description: Kolab Groupware daemon and utilities
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
-
-Package: kolab-cli
-Architecture: all
-Depends: pykolab, python, ${misc:Depends}
-Description: Command-line utilities for Kolab
- This package includes command-line utilities for Kolab Groupware
-
-Package: kolab-conf
-Architecture: all
-Depends: pykolab, python, ${misc:Depends}
-Description: Configuration management for Kolab
- This package includes configuration management utilities for
- Kolab Groupware
-
-Package: kolab-saslauthd
-Architecture: all
-Depends: pykolab, python, ${misc:Depends}
-Description: SASL Authentication Daemon for Kolab
- A multi-domain capable Kolab SASL Authentication daemon.
-
-Package: kolab-server
-Architecture: all
-Depends: pykolab, python, ${misc:Depends}
-Description: Kolab Groupware Server
- Server daemon synchronizing the mutations between various
- Kolab Groupware components.

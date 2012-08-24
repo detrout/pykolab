@@ -1,4 +1,0 @@
-usr/lib*/python*/*-packages/pykolab/cli/*.py
-usr/lib*/python*/*-packages/kolab/*.py
-kolab.py usr/sbin/kolab
-setup-kolab.py usr/sbin/setup-kolab
