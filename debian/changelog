@@ -1,5 +1,6 @@
-pykolab (0.5.3-1) unstable; urgency=low
+pykolab (0.5.3-1-1) unstable; urgency=low
 
+  * Non-maintainer upload.
   * Imported Upstream version 0.5.3
 
  -- Paul Klos <kolab@klos2day.nl>  Fri, 24 Aug 2012 22:50:53 +0200
