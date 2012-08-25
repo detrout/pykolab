@@ -3,7 +3,6 @@ Section: python
 Priority:  optional
 Maintainer: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
 Build-Depends: debhelper (>= 7.0.50~), python (>= 2.6~), autotools-dev, dh-autoreconf, intltool, libunistring0, libglib2.0-0, libglib2.0-dev, libcroco3, python2.6, libxml-parser-perl, mime-support, gettext, python-minimal, libexpat1, python-support, libxml2, libpcre3, libssl0.9.8, gawk
-Depends: python
 Standards-Version: 3.9.1
 Homepage: http://www.kolab.org
 Vcs-Git: git://git.kolab.org/git/pykolab
@@ -11,6 +10,6 @@ Vcs-Git: git://git.kolab.org/git/pykolab
 
 Package: pykolab
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, python
 Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
