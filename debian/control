@@ -13,3 +13,9 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, python
 Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
+
+Package: kolab-cli
+Architecture: all
+Depends: pykolab, python, ${misc:Depends}
+Description: Command-line utilities for Kolab
+ This package includes command-line utilities for Kolab Groupware
