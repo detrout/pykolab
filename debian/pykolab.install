@@ -1,5 +1,5 @@
 etc/kolab/kolab.conf
-bin/kolab_smtp_access_policy.py usr/lib/postfix/kolab_smtp_access_policy
+usr/lib/postfix/kolab_smtp_access_policy
 usr/lib*/python*/*-packages/pykolab/constants.py
 usr/lib*/python*/*-packages/pykolab/conf/__init__.py
 usr/lib*/python*/*-packages/pykolab/conf/defaults.py

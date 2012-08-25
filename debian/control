@@ -19,3 +19,21 @@ Architecture: all
 Depends: pykolab, python, ${misc:Depends}
 Description: Command-line utilities for Kolab
  This package includes command-line utilities for Kolab Groupware
+
+Package: kolab-conf
+Architecture: all
+Depends: pykolab, python, ${misc:Depends}
+Description: Command-line utilities for Kolab
+ This package includes command-line utilities for Kolab Groupware
+
+Package: kolab-saslauthd
+Architecture: all
+Depends: pykolab, python, ${misc:Depends}
+Description: Command-line utilities for Kolab
+ This package includes command-line utilities for Kolab Groupware
+
+Package: kolab-server
+Architecture: all
+Depends: pykolab, python, ${misc:Depends}
+Description: Command-line utilities for Kolab
+ This package includes command-line utilities for Kolab Groupware
