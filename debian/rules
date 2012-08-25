@@ -14,3 +14,6 @@ export DH_VERBOSE=1
 
 override_dh_auto_test:
 	dh_auto_test || echo “ignoring test failure”
+
+override_dh_install:
+	-dh_install -list-missing
