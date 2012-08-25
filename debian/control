@@ -3,7 +3,7 @@ Section: python
 Priority:  optional
 Maintainer: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
 Build-Depends: debhelper (>= 7.0.50~), python (>= 2.6~), python-dev (>= 2.6~), autotools-dev, dh-autoreconf, intltool, libunistring0, libglib2.0-0, libglib2.0-dev, libcroco3, python2.6, libxml-parser-perl, mime-support, gettext, python-minimal, libexpat1, python-support, libxml2, libpcre3, libssl0.9.8, gawk
-Standards-Version: 3.8.4
+Standards-Version: 3.9.1
 Homepage: http://www.kolab.org
 Vcs-Git: git://git.kolab.org/git/pykolab
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/pykolab.git;a=summary
