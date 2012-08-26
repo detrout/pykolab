@@ -10,13 +10,13 @@ Vcs-Git: git://git.kolab.org/git/pykolab
 
 Package: pykolab
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, python
+Depends: ${shlibs:Depends}, ${misc:Depends}, python, python-ldap (>= 2.4~), python-pyasn1, python-sqlalchemy
 Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
 
 Package: kolab-cli
 Architecture: all
-Depends: pykolab, python, ${misc:Depends}
+Depends: pykolab, python, ${misc:Depends}, python-augeas, python-cheetah
 Description: Command-line utilities for Kolab
  This package includes command-line utilities for Kolab Groupware
 
@@ -29,7 +29,7 @@ Description: Configuration management for Kolab
 
 Package: kolab-saslauthd
 Architecture: all
-Depends: pykolab, python, ${misc:Depends}
+Depends: pykolab, python, ${misc:Depends}, cyrus-sasl
 Description: SASL Authentication Daemon for Kolab
  A multi-domain capable Kolab SASL Authentication daemon.
 
