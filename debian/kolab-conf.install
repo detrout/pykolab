@@ -1,14 +1,3 @@
 usr/sbin/setup-kolab
 usr/sbin/kolab-conf
-usr/lib*/python*/*-packages/pykolab/setup/setup_freebusy.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_ldap.py
-usr/lib*/python*/*-packages/pykolab/setup/components.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_mysql.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_zpush.py
-usr/lib*/python*/*-packages/pykolab/setup/__init__.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_imap.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_roundcube.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_mta.py
-usr/lib*/python*/*-packages/pykolab/setup/setup_kolabd.py
-# not this one? usr/lib/python2.6/dist-packages/pykolab/setup/setup_php.py
-# not this one? usr/lib/python2.6/dist-packages/pykolab/setup/setup_zpush.py
+usr/lib*/python*/*-packages/pykolab/setup/
