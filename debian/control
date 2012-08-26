@@ -23,17 +23,37 @@ Description: Command-line utilities for Kolab
 Package: kolab-conf
 Architecture: all
 Depends: pykolab, python, ${misc:Depends}
-Description: Command-line utilities for Kolab
- This package includes command-line utilities for Kolab Groupware
+Description: Configuration management for Kolab
+ This package includes configuration management utilities for
+ Kolab Groupware
 
 Package: kolab-saslauthd
 Architecture: all
 Depends: pykolab, python, ${misc:Depends}
-Description: Command-line utilities for Kolab
- This package includes command-line utilities for Kolab Groupware
+Description: SASL Authentication Daemon for Kolab
+ A multi-domain capable Kolab SASL Authentication daemon.
 
 Package: kolab-server
 Architecture: all
 Depends: pykolab, python, ${misc:Depends}
-Description: Command-line utilities for Kolab
- This package includes command-line utilities for Kolab Groupware
+Description: Kolab Groupware Server
+ Server daemon synchronizing the mutations between various
+ Kolab Groupware components.
+
+Package: kolab-telemetry
+Architecture: all
+Depends: kolab-cli, python, ${misc:Depends}
+Description: Kolab Telemetry Logging Capabilities
+ Cyrus IMAP Telemetry logging handling capabilities for Kolab Groupware
+
+Package: kolab-content-filter
+Architecture: all
+Depends: kolab-xml, python, ${misc:Depends}
+Description: Kolab Content-Filter
+ This is the Kolab Content Filter, with plugins
+
+Package: kolab-xml
+Architecture: all
+Depends: pykolab, python, ${misc:Depends}
+Description: Kolab XML format wrapper for pykolab
+ Kolab Format XML bindings wrapper for pykolab

@@ -15,3 +15,4 @@ usr/lib*/python*/*-packages/pykolab/utils.py
 usr/lib*/python*/*-packages/pykolab/imap/__init__.py
 usr/lib*/python*/*-packages/pykolab/imap/cyrus.py
 usr/lib*/python*/*-packages/cyruslib.py
+usr/share/locale/*/LC_MESSAGES/pykolab.mo

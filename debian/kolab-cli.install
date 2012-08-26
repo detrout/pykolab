@@ -1,3 +1,8 @@
 usr/lib*/python*/*-packages/pykolab/cli/
+usr/lib*/python*/*-packages/pykolab/wap_client/
 usr/lib*/python*/*-packages/kolab/
 usr/sbin/kolab
+usr/share/kolab/templates/*.tpl
+usr/share/kolab/templates/roundcubemail/*.tpl
+usr/share/kolab/templates/freebusy/*.tpl
+usr/share/kolab/templates/zpush/*.tpl

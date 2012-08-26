@@ -1,0 +1,2 @@
+usr/sbin/kolab_parse_telemetry
+usr/lib*/python*/*-packages/pykolab/telemetry.py
