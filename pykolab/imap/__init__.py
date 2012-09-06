@@ -194,8 +194,7 @@ class IMAP(object):
             if self._imap.has_key(server):
                 del self._imap[server]
             else:
-                log.warning(_("Called imap.disconnect() on a server that " + \
-                    "we had no connection to"))
+                log.warning(_("Called imap.disconnect() on a server that we had no connection to."))
 
     def create_folder(self, folder_path, server=None):
         if not server == None:
@@ -276,34 +275,10 @@ class IMAP(object):
             shared = False
             metadata_path = metadata_path.replace('/private/', '/')
 
-        backend = conf.get('kolab', 'imap_backend')
-
-        if not self.domain == None:
-            if conf.has_section(self.domain) and conf.has_option(self.domain, 'imap_backend'):
-                backend = conf.get(self.domain, 'imap_backend')
-
         if not shared:
             log.warning(_("Private annotations need to be set using the appropriate user account."))
 
-        admin_login = conf.get(backend, 'admin_login')
-
-        admin_acl = None
-
-        acls = self.list_acls(folder)
-        if acls.has_key(admin_login):
-            admin_acl = acls[admin_login]
-
-        if admin_acl == None:
-            self.set_acl(folder, admin_login, 'lrsipwa')
-        elif not 'w' in admin_acl:
-            self.set_acl(folder, admin_login, '%sw' % (admin_acl))
-
         self.imap._setannotation(folder, metadata_path, metadata_value, shared)
-
-        if admin_acl == None:
-            self.set_acl(folder, admin_login, '')
-        elif not 'w' in admin_acl:
-            self.set_acl(folder, admin_login, admin_acl)
 
     def shared_folder_create(self, folder_path, server=None):
         """
@@ -338,7 +313,7 @@ class IMAP(object):
         if folder_name.startswith("shared%s" % (self.imap.separator) * 2):
             folder_name = folder_name[7:]
 
-        self.imap._setannotation(folder_name, '/vendor/kolab/folder-type', folder_type)
+        self.set_metadata(folder_name, '/shared/vendor/kolab/folder-type', folder_type)
 
     def shared_mailbox_create(self, mailbox_base_name, server=None):
         """
@@ -406,22 +381,18 @@ class IMAP(object):
                 level=8
             )
 
+        backend = conf.get('kolab', 'imap_backend')
+
+        admin_login = conf.get(backend, 'admin_login')
+        admin_password = conf.get(backend, 'admin_password')
+
+        self.connect(login=False)
+        self.login_plain(admin_login, admin_password, folder)
+
         for additional_folder in additional_folders.keys():
             _add_folder = {}
 
-            if len(folder.split('@')) > 1:
-                folder_name = "user%(separator)s%(username)s%(separator)s%(additional_folder_name)s@%(domainname)s"
-                _add_folder['username'] = folder.split('@')[0]
-                _add_folder['domainname'] = folder.split('@')[1]
-                _add_folder['additional_folder_name'] = additional_folder
-                _add_folder['separator'] = self.imap.separator
-                folder_name = folder_name % _add_folder
-            else:
-                folder_name = "user%(separator)s%(username)s%(separator)s%(additional_folder_name)s" % {
-                        "username": folder,
-                        "separator": self.imap.separator,
-                        "additional_folder_name": additional_folder
-                    }
+            folder_name = additional_folder
 
             try:
                 self.imap.cm(folder_name)
@@ -430,12 +401,11 @@ class IMAP(object):
 
             if additional_folders[additional_folder].has_key("annotations"):
                 for annotation in additional_folders[additional_folder]["annotations"].keys():
-                    if conf.get('kolab', 'imap_backend') == 'cyrus-imap':
-                        self.imap._setannotation(
-                                folder_name,
-                                "%s" % (annotation),
-                                "%s" % (additional_folders[additional_folder]["annotations"][annotation])
-                            )
+                    self.set_metadata(
+                            folder_name,
+                            "%s" % (annotation),
+                            "%s" % (additional_folders[additional_folder]["annotations"][annotation])
+                        )
 
             if additional_folders[additional_folder].has_key("quota"):
                 self.imap.sq(
@@ -450,8 +420,6 @@ class IMAP(object):
                             "%s" % (acl),
                             "%s" % (additional_folders[additional_folder]["acls"][acl])
                         )
-
-        backend = conf.get('kolab', 'imap_backend')
 
         if len(folder.split('@')) > 1:
             domain = folder.split('@')[1]
@@ -470,12 +438,6 @@ class IMAP(object):
                 uri = None
 
         log.debug(_("Subscribing user to the additional folders"), level=8)
-        # Get the credentials
-        admin_login = conf.get(backend, 'admin_login')
-        admin_password = conf.get(backend, 'admin_password')
-
-        self.connect(login=False)
-        self.login_plain(admin_login, admin_password, folder)
 
         _tests = []
 
@@ -490,6 +452,8 @@ class IMAP(object):
                 _tests.append(_shared)
 
         for _folder in self.lm():
+            log.debug(_("Folder %s") % (_folder), level=8)
+
             _subscribe = True
 
             for _test in _tests:
@@ -500,9 +464,11 @@ class IMAP(object):
                     _subscribe = False
 
             if _subscribe:
+                log.debug(_("Subscribing %s to folder %s") % (folder, _folder), level=8)
                 self.subscribe(_folder)
 
         self.logout()
+        self.connect(domain=self.domain)
 
     def user_mailbox_delete(self, mailbox_base_name):
         """
@@ -538,15 +504,12 @@ class IMAP(object):
             log.warning(_("Moving INBOX folder %s won't succeed as target folder %s already exists") % (old_name,new_name))
 
     def user_mailbox_server(self, mailbox):
-        self.connect(domain=self.domain)
         return self.imap.find_mailfolder_server(mailbox)
 
     def has_folder(self, folder):
         """
             Check if the environment has a folder named folder.
         """
-        self.connect(domain=self.domain)
-
         folders = self.imap.lm(folder)
         log.debug(_("Looking for folder '%s', we found folders: %r") % (folder,folders), level=8)
         # Greater then one, this folder may have subfolders.
@@ -596,8 +559,6 @@ class IMAP(object):
     """ Blah functions """
 
     def move_user_folders(self, users=[], domain=None):
-        self.connect(domain=domain)
-
         for user in users:
             if type(user) == dict:
                 if user.has_key('old_mail'):
@@ -627,9 +588,6 @@ class IMAP(object):
             Sets the quota in IMAP using the authentication and authorization
             database 'quota' attribute for the users listed in parameter 'users'
         """
-
-        self.connect(domain=primary_domain)
-
         if conf.has_option(primary_domain, 'quota_attribute'):
             _quota_attr = conf.get(primary_domain, 'quota_attribute')
         else:
@@ -707,8 +665,6 @@ class IMAP(object):
                 self.imap._setquota(folder, quota)
 
     def set_user_mailhost(self, users=[], primary_domain=None, secondary_domain=[], folders=[]):
-        self.connect(domain=primary_domain)
-
         if conf.has_option(primary_domain, 'mailserver_attribute'):
             _mailserver_attr = conf.get(primary_domain, 'mailserver_attribute')
         else:
@@ -756,7 +712,6 @@ class IMAP(object):
                 auth.set_user_attribute(primary_domain, user, _mailserver_attr, _current_mailserver)
 
     def parse_mailfolder(self, mailfolder):
-        self.connect()
         return self.imap.parse_mailfolder(mailfolder)
 
     def expunge_user_folders(self, inbox_folders=None):
@@ -777,8 +732,6 @@ class IMAP(object):
 
                 primary_domain, secondary_domains
         """
-        self.connect()
-
         if inbox_folders == None:
             inbox_folders = []
 
@@ -835,8 +788,6 @@ class IMAP(object):
             List the INBOX folders in the IMAP backend. Returns a list of unique
             base folder names.
         """
-        self.connect(domain=primary_domain)
-
         _folders = self.imap.lm("user/%")
         # TODO: Replace the .* below with a regex representing acceptable DNS
         # domain names.
