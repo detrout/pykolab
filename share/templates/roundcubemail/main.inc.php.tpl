@@ -22,7 +22,7 @@
     \$rcmail_config['mail_header_delimiter'] = NULL;
     \$rcmail_config['line_length'] = 72;
     \$rcmail_config['send_format_flowed'] = true;
-    \$rcmail_config['dont_override'] = Array();
+    \$rcmail_config['dont_override'] = Array('skin');
     \$rcmail_config['identities_level'] = 0;
     \$rcmail_config['contact_photo_size'] = 160;
     \$rcmail_config['email_dns_check'] = false;
@@ -90,7 +90,6 @@
             'acl',
             'archive',
             'calendar',
-            'compose_addressbook',
             'http_authentication',
             'jqueryui',
             'kolab_activesync',
@@ -99,6 +98,7 @@
             'kolab_core',
             'kolab_config',
             'kolab_folders',
+            'libkolab',
             'listcommands',
             'managesieve',
             'newmail_notifier',
@@ -135,7 +135,7 @@
 
     \$rcmail_config['product_name'] = 'Kolab Groupware';
 
-    \$rcmail_config['skin'] = 'default';
+    \$rcmail_config['skin'] = 'larry';
     \$rcmail_config['skin_logo'] = 'skins/kolab/images/kolab_logo.png';
     \$rcmail_config['skin_include_php'] = false;
     \$rcmail_config['mime_magic'] = '/usr/share/misc/magic';
@@ -184,6 +184,7 @@
             'kolab_core',
             'kolab_config',
             'kolab_folders',
+            'libkolab',
             'password',
         );
 
