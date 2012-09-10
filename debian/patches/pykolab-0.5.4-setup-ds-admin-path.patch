@@ -1,0 +1,17 @@
+--- a/pykolab/setup/setup_ldap.py
++++ b/pykolab/setup/setup_ldap.py
+@@ -222,8 +222,13 @@
+     os.write(fp, data)
+     os.close(fp)
+ 
++    setup_ds_admin = "/usr/sbin/setup-ds-admin.pl"
++
++    if not os.path.isfile(setup_ds_admin):
++        setup_ds_admin = "/usr/sbin/setup-ds-admin"
++
+     command = [
+-            '/usr/sbin/setup-ds-admin.pl',
++            setup_ds_admin,
+             '--debug',
+             '--silent',
+             '--force',
