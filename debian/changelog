@@ -1,3 +1,9 @@
+pykolab (0.5.4-3) unstable; urgency=low
+
+  * Let's not depend on libsasl2 since it is a virtual package
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen>  Tue, 11 Sep 2012 17:15:07 +0200
+
 pykolab (0.5.4-2) unstable; urgency=low
 
   * Correct the path for setup-ds-admin on Debian
