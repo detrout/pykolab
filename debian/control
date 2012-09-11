@@ -29,7 +29,7 @@ Description: Configuration management for Kolab
 
 Package: kolab-saslauthd
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, libsasl2, libsasl2-modules-ldap, sasl2-bin
+Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, libsasl2-modules-ldap, sasl2-bin
 Description: SASL Authentication Daemon for Kolab
  A multi-domain capable Kolab SASL Authentication daemon.
 
