@@ -1,3 +1,13 @@
+pykolab (0.5.4-2) unstable; urgency=low
+
+  * Correct the path for setup-ds-admin on Debian
+  * Add another patch that is not upstreamed for the failure to create a semaphore for the administrator server
+  * Add the plugins/ to the pykolab core package
+  * Make each package depend on the same version of the other packages that fall out of this source package
+  * Depend on the actual sasl2 packages we require
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Tue, 11 Sep 2012 17:04:30 +0200
+
 pykolab (0.5.4-1.1) unstable; urgency=low
 
   * Non-maintainer upload.
