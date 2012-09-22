@@ -1,3 +1,10 @@
+pykolab (0.5.5-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Imported Upstream version 0.5.5
+
+ -- Paul Klos <kolab@klos2day.nl>  Thu, 22 Sep 2012 11:59:00 +0200
+
 pykolab (0.5.4-3) unstable; urgency=low
 
   * Let's not depend on libsasl2 since it is a virtual package
