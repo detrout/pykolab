@@ -111,9 +111,8 @@
             'contextmenu',
         );
 
-
-    if (file_exists(RCMAIL_CONFIG_DIR . '/' . \$_SERVER["HTTP_HOST"] . '/main.inc.php')) {
-        include_once(RCMAIL_CONFIG_DIR . '/' . \$_SERVER["HTTP_HOST"] . '/main.inc.php');
+    if (file_exists(RCMAIL_CONFIG_DIR . '/' . \$_SERVER["HTTP_HOST"] . '/' . basename(__FILE__)) {
+        include_once(RCMAIL_CONFIG_DIR . '/' . \$_SERVER["HTTP_HOST"] . '/' . basename(__FILE__));
     }
 
     // Re-apply mandatory settings here.
@@ -134,7 +133,6 @@
     \$rcmail_config['smtp_debug'] = true;
 
     \$rcmail_config['product_name'] = 'Kolab Groupware';
-
     \$rcmail_config['skin'] = 'larry';
     \$rcmail_config['skin_logo'] = 'skins/kolab/images/kolab_logo.png';
     \$rcmail_config['skin_include_php'] = false;
@@ -264,9 +262,4 @@
     \$rcmail_config['autocomplete_single'] = true;
 
     \$rcmail_config['htmleditor'] = 0;
-
-    include_once("/etc/roundcubemail/kolab_auth.inc.php");
-
-    \$rcmail_config['kolab_cache'] = true;
-
 ?>
