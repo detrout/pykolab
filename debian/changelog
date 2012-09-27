@@ -1,3 +1,11 @@
+pykolab (0.5.5-2) unstable; urgency=low
+
+  * Include /var/log/kolab
+  * Add /var/lib/kolab Add post installation file that is supposed to add the users and groups needed, and fixes directory permissions
+  * Add a patch for the default user for dirsrv
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Thu, 27 Sep 2012 19:45:05 +0200
+
 pykolab (0.5.5-1.1) unstable; urgency=low
 
   * Non-maintainer upload.
