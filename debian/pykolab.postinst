@@ -3,7 +3,7 @@
 # From http://www.debian.org/doc/manuals/securing-debian-howto/ch9.en.html#s-bpp-lower-privs
 
 case "$1" in
-    install|upgrade)
+    install|upgrade|configure)
 
         # Add the kolab user and group accounts
         getent group kolab &>/dev/null || addgroup --quiet --system --gid 412 kolab &>/dev/null
@@ -30,14 +30,14 @@ case "$1" in
                 --home /var/lib/kolab \
                 --gecos "Kolab System Account (R)" kolab-r &>/dev/null || :
 
-        chown -R kolab:kolab /var/lib/kolab
+        chown -R kolab:kolab /var/lib/kolab /var/log/kolab
         chgrp kolab /etc/kolab /etc/kolab/kolab.conf
         chmod 750 /etc/kolab /var/lib/kolab /var/log/kolab
         chmod 640 /etc/kolab/kolab.conf
 
         if ! dpkg-statoverride --list /var/lib/kolab >/dev/null; then
-            dpkg-statoverride --add kolab --group kolab 750 /var/lib/kolab
-            dpkg-statoverride --add kolab --group kolab 750 /var/log/kolab
+            dpkg-statoverride --add kolab kolab 750 /var/lib/kolab
+            dpkg-statoverride --add kolab kolab 750 /var/log/kolab
         fi
 
     ;;
