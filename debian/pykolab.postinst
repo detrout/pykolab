@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# From http://www.debian.org/doc/manuals/securing-debian-howto/ch9.en.html#s-bpp-lower-privs
+
+case "$1" in
+    install|upgrade)
+
+        # Add the kolab user and group accounts
+        getent group kolab &>/dev/null || addgroup --quiet --system --gid 412 kolab &>/dev/null
+        getent passwd kolab &>/dev/null || \
+            adduser --quiet --system \
+                --uid 412 --gid 412 --disabled-password \
+                --home /var/lib/kolab \
+                --gecos "Kolab System Account" kolab &>/dev/null || :
+
+        gpasswd -a www-data kolab >/dev/null 2>&1 || :
+
+        getent group kolab-n &>/dev/null || groupadd --quiet --system --gid 413 kolab-n &>/dev/null
+        getent passwd kolab-n &>/dev/null || \
+            adduser --quiet --system \
+                --uid 413 --gid 413 --disabled-password \
+                --home /var/lib/kolab \
+                --gecos "Kolab System Account (N)" kolab-n &>/dev/null || :
+            gpasswd -a kolab-n kolab &>/dev/null || :
+
+        getent group kolab-r &>/dev/null || groupadd --quiet --system --gid 414 kolab-r &>/dev/null
+        getent passwd kolab-r &>/dev/null || \
+            adduser --quiet --system \
+                --uid 414 --gid 414 --disabled-password \
+                --home /var/lib/kolab \
+                --gecos "Kolab System Account (R)" kolab-r &>/dev/null || :
+
+        chown -R kolab:kolab /var/lib/kolab
+        chgrp kolab /etc/kolab /etc/kolab/kolab.conf
+        chmod 750 /etc/kolab /var/lib/kolab /var/log/kolab
+        chmod 640 /etc/kolab/kolab.conf
+
+        if ! dpkg-statoverride --list /var/lib/kolab >/dev/null; then
+            dpkg-statoverride --add kolab --group kolab 750 /var/lib/kolab
+            dpkg-statoverride --add kolab --group kolab 750 /var/log/kolab
+        fi
+
+    ;;
+esac
+
+#DEBHELPER#
+
