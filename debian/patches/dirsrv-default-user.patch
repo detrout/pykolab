@@ -1,0 +1,21 @@
+--- a/pykolab/setup/setup_ldap.py
++++ b/pykolab/setup/setup_ldap.py
+@@ -109,14 +109,14 @@
+                     """)
+             )
+ 
+-        _input['userid'] = utils.ask_question(_("User"), default="nobody")
+-        _input['group'] = utils.ask_question(_("Group"), default="nobody")
++        _input['userid'] = utils.ask_question(_("User"), default="dirsrv")
++        _input['group'] = utils.ask_question(_("Group"), default="dirsrv")
+ 
+     else:
+         _input['admin_pass'] = conf.get('ldap', 'bind_pw')
+         _input['dirmgr_pass'] = conf.get('ldap', 'bind_pw')
+-        _input['userid'] = "nobody"
+-        _input['group'] = "nobody"
++        _input['userid'] = "dirsrv"
++        _input['group'] = "dirsrv"
+ 
+     # TODO: Verify the user and group exist.
+ 
