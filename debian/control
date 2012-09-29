@@ -10,7 +10,7 @@ Vcs-Git: git://git.kolab.org/git/pykolab
 
 Package: pykolab
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, python, python-ldap (>= 2.4~), python-pyasn1, python-sqlalchemy
+Depends: ${shlibs:Depends}, ${misc:Depends}, python, python-ldap (>= 2.4~), python-pyasn1, python-pyasn1-modules, python-sqlalchemy
 Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
 
