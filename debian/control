@@ -49,13 +49,13 @@ Description: Configuration management for Kolab
 
 Package: kolab-saslauthd
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, libsasl2-modules-ldap, sasl2-bin
+Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, libsasl2-modules-ldap, sasl2-bin, lsb-base (>= 3.0-6)
 Description: SASL Authentication Daemon for Kolab
  A multi-domain capable Kolab SASL Authentication daemon.
 
 Package: kolab-server
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}
+Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, lsb-base (>= 3.0-6)
 Description: Kolab Groupware Server
  Server daemon synchronizing the mutations between various
  Kolab Groupware components.
@@ -74,7 +74,7 @@ Description: Kolab XML format wrapper for pykolab
 
 Package: wallace
 Architecture: all
-Depends: pykolab (= ${binary:Version}), kolab-xml (= ${binary:Version}), python, ${misc:Depends}
+Depends: pykolab (= ${binary:Version}), kolab-xml (= ${binary:Version}), python, ${misc:Depends}, lsb-base (>= 3.0-6)
 Description: Kolab Content-Filter
  This is the Kolab Content Filter, with plugins
 

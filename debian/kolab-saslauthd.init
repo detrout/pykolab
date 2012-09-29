@@ -1,19 +1,19 @@
-#! /bin/bash
-#
+#!/bin/sh
 ### BEGIN INIT INFO
-# Provides: wallaced
+# Provides: kolab-saslauthd
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Required-Start: $remote_fs $local_fs $network
 # Required-Stop: $remote_fs $local_fs $network
-# Short-Description: Start/Stop the Kolab Server daemon
-# Description:      The Kolab Wallace server daemon is a content filtering daemon.
+# Short-Description: Start/Stop the Kolab SASL authentication daemon
+# Description:      The Kolab saslauthd is a server process which handles \
+#              authentication requests on behalf of the cyrus-sasl library.
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="The Kolab Wallace server daemon is a content filtering daemon" # Introduce a short description here
-NAME=wallace						# Introduce the short server's name here
-DAEMON=/usr/sbin/wallaced			# Introduce the server's location here
+DESC="The Kolab saslauthd is a server process which handles authentication requests on behalf of the cyrus-sasl library." # Introduce a short description here
+NAME=kolab-saslauthd				# Introduce the short server's name here
+DAEMON=/usr/sbin/kolab-saslauthd	# Introduce the server's location here
 DAEMON_ARGS="--fork -l warning"	# Arguments to run the daemon with
 PIDFILE=/run/$NAME.pid
 LOCKFILE=/run/lock/$NAME

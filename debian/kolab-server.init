@@ -1,19 +1,20 @@
 #! /bin/bash
-#
 ### BEGIN INIT INFO
-# Provides: wallaced
+# Provides: kolabd
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Required-Start: $remote_fs $local_fs $network
 # Required-Stop: $remote_fs $local_fs $network
 # Short-Description: Start/Stop the Kolab Server daemon
-# Description:      The Kolab Wallace server daemon is a content filtering daemon.
+# Description:      The Kolab server is a server process which synchronizes
+#                   LDAP, SQL and other authentication databases with Cyrus IMAP,
+#                   Dovecot or other IMAP servers.
 ### END INIT INFO
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="The Kolab Wallace server daemon is a content filtering daemon" # Introduce a short description here
-NAME=wallace						# Introduce the short server's name here
-DAEMON=/usr/sbin/wallaced			# Introduce the server's location here
+DESC="The Kolab server synchronizes LDAP, SQL and other authentication databases with Cyrus IMAP, Dovecot or other IMAP servers." # Introduce a short description here
+NAME=kolab-server					# Introduce the short server's name here
+DAEMON=/usr/sbin/kolabd				# Introduce the server's location here
 DAEMON_ARGS="--fork -l warning"	# Arguments to run the daemon with
 PIDFILE=/run/$NAME.pid
 LOCKFILE=/run/lock/$NAME
