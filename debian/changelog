@@ -1,3 +1,10 @@
+pykolab (0.5.5-5.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Trying to install wallace init.d script from wallace.init
+
+ -- Paul Klos <kolab@klos2day.nl>  Sat, 29 Sep 2012 18:00:00 +0200
+
 pykolab (0.5.5-4) unstable; urgency=low
 
   * pykolab is to depend on python-pyasn1-modules as well (#1058)
