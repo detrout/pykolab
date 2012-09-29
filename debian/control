@@ -2,7 +2,27 @@ Source: pykolab
 Section: python
 Priority:  optional
 Maintainer: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
-Build-Depends: debhelper (>= 7.0.50~), python (>= 2.6~), autotools-dev, dh-autoreconf, intltool, libunistring0, libglib2.0-0, libglib2.0-dev, libcroco3, python2.6, libxml-parser-perl, mime-support, gettext, python-minimal, libexpat1, python-support, libxml2, libpcre3, libssl1.0.0, gawk
+Build-Depends:  autotools-dev,
+                debhelper (>= 7.0.50~),
+                dh-autoreconf,
+                gawk,
+                gettext,
+                intltool,
+                libcroco3,
+                libexpat1,
+                libglib2.0-0,
+                libglib2.0-dev,
+                libpcre3,
+                libssl1.0.0,
+                libunistring0,
+                libxml-parser-perl,
+                libxml2,
+                mime-support,
+                python (>= 2.6~),
+                python2.6,
+                python-minimal,
+                python-nose,
+                python-support
 Standards-Version: 3.9.3
 Homepage: http://www.kolab.org
 Vcs-Git: git://git.kolab.org/git/pykolab
@@ -46,14 +66,15 @@ Depends: kolab-cli (= ${binary:Version}), python, ${misc:Depends}
 Description: Kolab Telemetry Logging Capabilities
  Cyrus IMAP Telemetry logging handling capabilities for Kolab Groupware
 
-Package: kolab-content-filter
-Architecture: all
-Depends: kolab-xml (= ${binary:Version}), python, ${misc:Depends}
-Description: Kolab Content-Filter
- This is the Kolab Content Filter, with plugins
-
 Package: kolab-xml
 Architecture: all
 Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}
 Description: Kolab XML format wrapper for pykolab
  Kolab Format XML bindings wrapper for pykolab
+
+Package: wallace
+Architecture: all
+Depends: pykolab (= ${binary:Version}), kolab-xml (= ${binary:Version}), python, ${misc:Depends}
+Description: Kolab Content-Filter
+ This is the Kolab Content Filter, with plugins
+
