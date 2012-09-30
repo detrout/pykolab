@@ -18,11 +18,12 @@ DAEMON_ARGS="--fork -l warning"	# Arguments to run the daemon with
 PIDFILE=/run/$NAME.pid
 LOCKFILE=/run/lock/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
+DEFAULTSFILE=/etc/default/$NAME
 USER="kolab"
 GROUP="kolab"
 
 # Read configuration variable file if it is present
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+[ -r $DEFAULTSFILE ] && . $DEFAULTSFILE
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -40,6 +41,12 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
+        # If the daemon is not enabled, give the user a warning and stop.
+	if [ "$START" != "yes" ]; then
+			log_warning_msg "To enable $NAME, edit $DEFAULTSFILE and set START=yes"
+			return 0
+	fi
+
 	start-stop-daemon \
 		--start \
 	  --quiet \
@@ -61,7 +68,7 @@ do_start()
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
 	# on this one.  As a last resort, sleep for some time.
-    [ $RETVAL -eq 0 ] && touch $LOCKFILE
+    touch $LOCKFILE
 }
 
 #
