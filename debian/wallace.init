@@ -12,17 +12,17 @@
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="The Kolab Wallace server daemon is a content filtering daemon" # Introduce a short description here
-NAME=wallace						# Introduce the short server's name here
+NAME=wallaced						# Introduce the short server's name here
 DAEMON=/usr/sbin/wallaced			# Introduce the server's location here
 DAEMON_ARGS="--fork -l warning"	# Arguments to run the daemon with
-PIDFILE=/run/$NAME.pid
+PIDFILE=/run/wallaced/wallaced.pid
 LOCKFILE=/run/lock/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 USER="kolab"
-GROUP="kolab"
+GROUP="kolab-n"
 
 # Read configuration variable file if it is present
-[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+[ -r /etc/default/wallace ] && . /etc/default/wallace
 
 # Load the VERBOSE setting and other rcS variables
 . /lib/init/vars.sh
@@ -42,12 +42,12 @@ do_start()
 	#   2 if daemon could not be started
 	start-stop-daemon \
 		--start \
-	  --quiet \
-	  --pidfile $PIDFILE \
-	  --exec $DAEMON \
-	  --user $USER \
-	  --group $GROUP \
-	  --test > /dev/null \
+		--quiet \
+		--pidfile $PIDFILE \
+		--exec $DAEMON \
+		--user $USER \
+		--group $GROUP \
+		--test > /dev/null \
 		|| return 1
 	start-stop-daemon \
 		--start \
@@ -56,7 +56,7 @@ do_start()
 		--group $GROUP \
 		--pidfile $PIDFILE \
 		--exec $DAEMON \
-		-- $DAEMON_ARGS \
+		-- $FLAGS $DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
