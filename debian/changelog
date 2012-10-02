@@ -1,3 +1,12 @@
+pykolab (0.5.5-5) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Add dependency on python-kolabformat (#1064)
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Tue, 02 Oct 2012 12:10:18 -0400
+
 pykolab (0.5.5-4) unstable; urgency=low
 
   * pykolab is to depend on python-pyasn1-modules as well (#1058)
