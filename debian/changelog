@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-pykolab (0.5.5-5.1) unstable; urgency=low
+pykolab (0.5.5-6.1) unstable; urgency=low
 
   * Non-maintainer upload.
   * Trying to install wallace init.d script from wallace.init
