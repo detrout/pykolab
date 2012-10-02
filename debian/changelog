@@ -1,9 +1,20 @@
+<<<<<<< HEAD
 pykolab (0.5.5-5.1) unstable; urgency=low
 
   * Non-maintainer upload.
   * Trying to install wallace init.d script from wallace.init
 
  -- Paul Klos <kolab@klos2day.nl>  Sat, 29 Sep 2012 18:00:00 +0200
+=======
+pykolab (0.5.5-5) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Add dependency on python-kolabformat (#1064)
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Tue, 02 Oct 2012 12:10:18 -0400
+>>>>>>> 46bfd90273ced8c7636c9be5e1301bd09e32c272
 
 pykolab (0.5.5-4) unstable; urgency=low
 

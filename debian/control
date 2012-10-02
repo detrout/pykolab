@@ -68,7 +68,7 @@ Description: Kolab Telemetry Logging Capabilities
 
 Package: kolab-xml
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}
+Depends: pykolab (= ${binary:Version}), python, python-kolabformat, ${misc:Depends}
 Description: Kolab XML format wrapper for pykolab
  Kolab Format XML bindings wrapper for pykolab
 
