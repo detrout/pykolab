@@ -2,6 +2,8 @@
 
 # From http://www.debian.org/doc/manuals/securing-debian-howto/ch9.en.html#s-bpp-lower-privs
 
+set -e
+
 case "$1" in
     install|upgrade|configure)
 
