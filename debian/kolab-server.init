@@ -20,7 +20,7 @@ PIDFILE=/run/$NAME/$NAME.pid
 LOCKFILE=/run/lock/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 USER="kolab"
-GROUP="kolab"
+GROUP="kolab-n"
 
 # Read configuration variable file if it is present
 [ -r /etc/default/kolab-server ] && . /etc/default/kolab-server

@@ -2,5 +2,5 @@
 #
 # See wallaced --help for more flags.
 #
-FLAGS="--fork -l warning"
-DAEMON_ARGS="--user kolab" 
+FLAGS="-l warning"
+DAEMON_ARGS="--fork --user kolab" 

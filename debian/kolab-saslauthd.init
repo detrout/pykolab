@@ -15,12 +15,10 @@ DESC="The Kolab saslauthd is a server process which handles authentication reque
 NAME=kolab-saslauthd				# Introduce the short server's name here
 DAEMON=/usr/sbin/kolab-saslauthd	# Introduce the server's location here
 DAEMON_ARGS="--fork -l warning"	# Arguments to run the daemon with
-PIDFILE=/run/$NAME.pid
+PIDFILE=/run/$NAME/$NAME.pid
 LOCKFILE=/run/lock/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 DEFAULTSFILE=/etc/default/$NAME
-USER="kolab"
-GROUP="kolab"
 
 # Read configuration variable file if it is present
 [ -r $DEFAULTSFILE ] && . $DEFAULTSFILE
@@ -49,21 +47,17 @@ do_start()
 
 	start-stop-daemon \
 		--start \
-	  --quiet \
-	  --pidfile $PIDFILE \
-	  --exec $DAEMON \
-	  --user $USER \
-	  --group $GROUP \
-	  --test > /dev/null \
+		--quiet \
+		--pidfile $PIDFILE \
+		--exec $DAEMON \
+		--test > /dev/null \
 		|| return 1
 	start-stop-daemon \
 		--start \
 		--quiet \
-		--user $USER \
-		--group $GROUP \
 		--pidfile $PIDFILE \
 		--exec $DAEMON \
-		-- $DAEMON_ARGS \
+		-- $FLAGS $DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
 	# to handle requests from services started subsequently which depend
@@ -85,8 +79,7 @@ do_stop()
 		  --stop \
 		  --quiet \
 		  --retry=TERM/30/KILL/5 \
-		  --pidfile $PIDFILE \
-		  --name $NAME
+		  --pidfile $PIDFILE
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
 	# Wait for children to finish too if this is a daemon that forks
