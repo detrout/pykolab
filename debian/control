@@ -75,6 +75,7 @@ Description: Kolab XML format wrapper for pykolab
 Package: wallace
 Architecture: all
 Depends: pykolab (= ${binary:Version}), kolab-xml (= ${binary:Version}), python, ${misc:Depends}, lsb-base (>= 3.0-6)
+Replaces: kolab-content-filter
+Provides: kolab-content-filter
 Description: Kolab Content-Filter
  This is the Kolab Content Filter, with plugins
-

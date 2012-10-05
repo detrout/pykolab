@@ -17,7 +17,7 @@ case "$1" in
 
         gpasswd -a www-data kolab >/dev/null 2>&1 || :
 
-        getent group kolab-n &>/dev/null || groupadd --system --gid 413 kolab-n &>/dev/null
+        getent group kolab-n &>/dev/null || addgroup --quiet --system --gid 413 kolab-n &>/dev/null
         getent passwd kolab-n &>/dev/null || \
             adduser --quiet --system \
                 --uid 413 --gid 413 --disabled-password \
@@ -25,7 +25,7 @@ case "$1" in
                 --gecos "Kolab System Account (N)" kolab-n &>/dev/null || :
             gpasswd -a kolab-n kolab &>/dev/null || :
 
-        getent group kolab-r &>/dev/null || groupadd --system --gid 414 kolab-r &>/dev/null
+        getent group kolab-r &>/dev/null || addgroup --system --gid 414 kolab-r &>/dev/null
         getent passwd kolab-r &>/dev/null || \
             adduser --quiet --system \
                 --uid 414 --gid 414 --disabled-password \
