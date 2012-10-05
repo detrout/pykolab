@@ -19,6 +19,7 @@ PIDFILE=/run/$NAME/$NAME.pid
 LOCKFILE=/run/lock/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 DEFAULTSFILE=/etc/default/$NAME
+USER=kolab
 
 # Read configuration variable file if it is present
 [ -r $DEFAULTSFILE ] && . $DEFAULTSFILE
@@ -49,14 +50,16 @@ do_start()
 		--start \
 		--quiet \
 		--pidfile $PIDFILE \
-		--exec $DAEMON \
+		--startas $DAEMON \
+		--user $USER \
 		--test > /dev/null \
 		|| return 1
 	start-stop-daemon \
 		--start \
 		--quiet \
 		--pidfile $PIDFILE \
-		--exec $DAEMON \
+		--startas $DAEMON \
+		--chuid $USER \
 		-- $FLAGS $DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
@@ -79,6 +82,8 @@ do_stop()
 		  --stop \
 		  --quiet \
 		  --retry=TERM/30/KILL/5 \
+		  --startas $DAEMON \
+		  --user $USER \
 		  --pidfile $PIDFILE
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
