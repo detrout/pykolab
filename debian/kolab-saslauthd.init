@@ -19,7 +19,9 @@ PIDFILE=/run/$NAME/$NAME.pid
 LOCKFILE=/run/lock/$NAME
 SCRIPTNAME=/etc/init.d/$NAME
 DEFAULTSFILE=/etc/default/$NAME
+SOCKETDIR=/run/saslauthd
 USER=kolab
+GROUP=kolab-n
 
 # Read configuration variable file if it is present
 [ -r $DEFAULTSFILE ] && . $DEFAULTSFILE
@@ -46,12 +48,25 @@ do_start()
 			return 0
 	fi
 
+	# Make sure the pid directory is there
+	if [ ! -d /run/$NAME ]; then
+	  mkdir /run/$NAME
+	fi
+	chown $USER:$GROUP /run/$NAME
+
+	# Make sure the socket directory is there
+	if [ ! -d $SOCKETDIR ]; then
+	  mkdir $SOCKETDIR
+	fi
+	chown $USER:$GROUP $SOCKETDIR
+
 	start-stop-daemon \
 		--start \
 		--quiet \
 		--pidfile $PIDFILE \
 		--startas $DAEMON \
 		--user $USER \
+		--group $GROUP \
 		--test > /dev/null \
 		|| return 1
 	start-stop-daemon \
@@ -60,6 +75,7 @@ do_start()
 		--pidfile $PIDFILE \
 		--startas $DAEMON \
 		--chuid $USER \
+		--group $GROUP \
 		-- $FLAGS $DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready
@@ -84,6 +100,7 @@ do_stop()
 		  --retry=TERM/30/KILL/5 \
 		  --startas $DAEMON \
 		  --user $USER \
+		  --group $GROUP \
 		  --pidfile $PIDFILE
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
