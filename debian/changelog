@@ -1,3 +1,9 @@
+pykolab (0.5.5-7) unstable; urgency=low
+
+  * Depend on python-icalendar (pykolab, kolab-xml, wallace)
+
+ -- Paul Klos <kolab@klos2day.nl>  Sat, 20 Oct 2012 22:53:51 +0200
+
 pykolab (0.5.5-6.1) unstable; urgency=low
 
   * Non-maintainer upload.

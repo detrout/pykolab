@@ -2,6 +2,7 @@ Source: pykolab
 Section: python
 Priority:  optional
 Maintainer: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
+Uploaders: Paul Klos <kolab@klos2day.nl>
 Build-Depends:  autotools-dev,
                 debhelper (>= 7.0.50~),
                 dh-autoreconf,
@@ -22,7 +23,8 @@ Build-Depends:  autotools-dev,
                 python2.6,
                 python-minimal,
                 python-nose,
-                python-support
+                python-support,
+                python-icalendar
 Standards-Version: 3.9.3
 Homepage: http://www.kolab.org
 Vcs-Git: git://git.kolab.org/git/pykolab
@@ -30,7 +32,15 @@ Vcs-Git: git://git.kolab.org/git/pykolab
 
 Package: pykolab
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, python, python-ldap (>= 2.4~), python-pyasn1, python-pyasn1-modules, python-sqlalchemy, adduser (>= 3.11)
+Depends: ${shlibs:Depends},
+          ${misc:Depends},
+          python,
+          python-ldap (>= 2.4~),
+          python-pyasn1,
+          python-pyasn1-modules,
+          python-sqlalchemy,
+          adduser (>= 3.11),
+          python-icalendar
 Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
 
@@ -68,13 +78,22 @@ Description: Kolab Telemetry Logging Capabilities
 
 Package: kolab-xml
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, python-kolabformat, ${misc:Depends}
+Depends: pykolab (= ${binary:Version}),
+         python,
+         python-kolabformat,
+         ${misc:Depends},
+         python-icalendar
 Description: Kolab XML format wrapper for pykolab
  Kolab Format XML bindings wrapper for pykolab
 
 Package: wallace
 Architecture: all
-Depends: pykolab (= ${binary:Version}), kolab-xml (= ${binary:Version}), python, ${misc:Depends}, lsb-base (>= 3.0-6)
+Depends: pykolab (= ${binary:Version}),
+         kolab-xml (= ${binary:Version}),
+         python,
+         ${misc:Depends},
+         lsb-base (>= 3.0-6),
+         python-icalendar
 Replaces: kolab-content-filter
 Provides: kolab-content-filter
 Description: Kolab Content-Filter
