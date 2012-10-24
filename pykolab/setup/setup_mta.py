@@ -20,6 +20,7 @@
 from augeas import Augeas
 from Cheetah.Template import Template
 import os
+import shutil
 import subprocess
 
 import components
@@ -208,6 +209,13 @@ result_attribute = mail
 
         }
 
+    if not os.path.isfile('/etc/postfix/main.cf'):
+        if os.path.isfile('/usr/share/postfix/main.cf.debian'):
+            shutil.copy(
+                '/usr/share/postfix/main.cf.debian',
+                '/etc/postfix/main.cf'
+            )
+
     myaugeas = Augeas()
 
     setting_base = '/files/etc/postfix/main.cf/'
@@ -266,46 +274,85 @@ result_attribute = mail
 
     template_file = None
 
-    if os.path.isfile('/etc/kolab/templates/amavisd.conf.tpl'):
-        template_file = '/etc/kolab/templates/amavisd.conf.tpl'
-    elif os.path.isfile('/usr/share/kolab/templates/amavisd.conf.tpl'):
-        template_file = '/usr/share/kolab/templates/amavisd.conf.tpl'
-    elif os.path.isfile(os.path.abspath(os.path.join(__file__, '..', '..', '..', 'share', 'templates', 'amavisd.conf.tpl'))):
-        template_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'share', 'templates', 'amavisd.conf.tpl'))
+    # On RPM installations, Amavis configuration is contained within a single file.
+    if os.path.isfile("/etc/amavsid/amavisd.conf"):
+        if os.path.isfile('/etc/kolab/templates/amavisd.conf.tpl'):
+            template_file = '/etc/kolab/templates/amavisd.conf.tpl'
+        elif os.path.isfile('/usr/share/kolab/templates/amavisd.conf.tpl'):
+            template_file = '/usr/share/kolab/templates/amavisd.conf.tpl'
+        elif os.path.isfile(os.path.abspath(os.path.join(__file__, '..', '..', '..', 'share', 'templates', 'amavisd.conf.tpl'))):
+            template_file = os.path.abspath(os.path.join(__file__, '..', '..', '..', 'share', 'templates', 'amavisd.conf.tpl'))
 
-    if not template_file == None:
-        fp = open(template_file, 'r')
-        template_definition = fp.read()
-        fp.close()
+        if not template_file == None:
+            fp = open(template_file, 'r')
+            template_definition = fp.read()
+            fp.close()
 
-        t = Template(template_definition, searchList=[amavisd_settings])
-        fp = open('/etc/amavisd/amavisd.conf', 'w')
-        fp.write(t.__str__())
-        fp.close()
+            t = Template(template_definition, searchList=[amavisd_settings])
+            if os.path.isdir('/etc/amavisd'):
+                fp = open('/etc/amavisd/amavisd.conf', 'w')
+            elif os.path.isdir('/etc/amavis'):
+                fp = open('/etc/amavis/amavisd.conf', 'w')
+            fp.write(t.__str__())
+            fp.close()
 
+        else:
+            log.error(_("Could not write out Amavis configuration file /etc/amavisd/amavisd.conf"))
+            return
+
+    # On APT installations, /etc/amavis/conf.d/ is a directory with many more files.
+    # 
+    # Somebody could work on enhancement request #1080 to configure LDAP lookups,
+    # while really it isn't required.
     else:
-        log.error(_("Could not write out Amavis configuration file /etc/amavisd/amavisd.conf"))
-        return
+        log.info(_("Not writing out any configuration for Amavis."))
+        # On debian wheezy amavisd-new expects '/etc/mailname' - possibly remediable through
+        # the #1080 enhancement mentioned above, but here's a quick fix.
+        f = open('/etc/mailname','w')
+        f.writelines(conf.get('kolab', 'primary_domain'))
+        f.close()
 
+    if os.path.isfile('/etc/default/spamassassin'):
+        myaugeas = Augeas()
+        setting = os.path.join('/files/etc/default/spamassassin','ENABLED')
+        if not myaugeas.get(setting) == '1':
+            myaugeas.set(setting,'1')
+            myaugeas.save()
+        myaugeas.close()
+        
     if os.path.isfile('/bin/systemctl'):
         subprocess.call(['systemctl', 'restart', 'postfix.service'])
-        subprocess.call(['systemctl', 'enable', 'postfix.service'])
         subprocess.call(['systemctl', 'restart', 'amavisd.service'])
-        subprocess.call(['systemctl', 'enable', 'amavisd.service'])
         subprocess.call(['systemctl', 'restart', 'clamd.amavisd.service'])
-        subprocess.call(['systemctl', 'enable', 'clamd.amavisd.service'])
         subprocess.call(['systemctl', 'restart', 'wallace.service'])
-        subprocess.call(['systemctl', 'enable', 'wallace.service'])
     elif os.path.isfile('/sbin/service'):
         subprocess.call(['service', 'postfix', 'restart'])
-        subprocess.call(['chkconfig', 'postfix', 'on'])
         subprocess.call(['service', 'amavisd', 'restart'])
-        subprocess.call(['chkconfig', 'amavisd', 'on'])
         subprocess.call(['service', 'clamd.amavisd', 'restart'])
-        subprocess.call(['chkconfig', 'clamd.amavisd', 'on'])
         subprocess.call(['service', 'wallace', 'restart'])
-        subprocess.call(['chkconfig', 'wallace', 'on'])
+    elif os.path.isfile('/usr/sbin/service'):
+        subprocess.call(['/usr/sbin/service','postfix','restart'])
+        subprocess.call(['/usr/sbin/service','amavis','restart'])
+        subprocess.call(['/usr/sbin/service','clamav-daemon','restart'])
+        subprocess.call(['/usr/sbin/service','wallace','restart'])
     else:
-        log.error(_("Could not start and configure to start on boot, the " + \
-                "postfix, clamav.amavisd and amavisd services."))
+        log.error(_("Could not start the postfix, clamav and amavisd services services."))
 
+    if os.path.isfile('/bin/systemctl'):
+        subprocess.call(['systemctl', 'enable', 'postfix.service'])
+        subprocess.call(['systemctl', 'enable', 'amavisd.service'])
+        subprocess.call(['systemctl', 'enable', 'clamd.amavisd.service'])
+        subprocess.call(['systemctl', 'enable', 'wallace.service'])
+    elif os.path.isfile('/sbin/chkconfig'):
+        subprocess.call(['chkconfig', 'postfix', 'on'])
+        subprocess.call(['chkconfig', 'amavisd', 'on'])
+        subprocess.call(['chkconfig', 'clamd.amavisd', 'on'])
+        subprocess.call(['chkconfig', 'wallace', 'on'])
+    elif os.path.isfile('/usr/sbin/update-rc.d'):
+        subprocess.call(['/usr/sbin/update-rc.d', 'postfix', 'defaults'])
+        subprocess.call(['/usr/sbin/update-rc.d', 'amavis', 'defaults'])
+        subprocess.call(['/usr/sbin/update-rc.d', 'clamav-daemon', 'defaults'])
+        subprocess.call(['/usr/sbin/update-rc.d', 'wallace', 'defaults'])
+    else:
+        log.error(_("Could not configure to start on boot, the " + \
+                "postfix, clamav and amavisd services."))
