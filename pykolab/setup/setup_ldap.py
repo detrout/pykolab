@@ -20,9 +20,11 @@
 import ldap
 import ldap.modlist
 import os
+import pwd
 import shutil
 import subprocess
 import tempfile
+import time
 
 import components
 
@@ -109,14 +111,26 @@ def execute(*args, **kw):
                     """)
             )
 
-        _input['userid'] = utils.ask_question(_("User"), default="nobody")
-        _input['group'] = utils.ask_question(_("Group"), default="nobody")
+        try:
+            pw = pwd.getpwnam("dirsrv")
+        except:
+            _input['userid'] = utils.ask_question(_("User"), default="nobody")
+            _input['group'] = utils.ask_question(_("Group"), default="nobody")
+        else:
+            _input['userid'] = utils.ask_question(_("User"), default="dirsrv")
+            _input['group'] = utils.ask_question(_("Group"), default="dirsrv")
 
     else:
         _input['admin_pass'] = conf.get('ldap', 'bind_pw')
         _input['dirmgr_pass'] = conf.get('ldap', 'bind_pw')
-        _input['userid'] = "nobody"
-        _input['group'] = "nobody"
+        try:
+            pw = pwd.getpwnam("dirsrv")
+        except:
+            _input['userid'] = "nobody"
+            _input['group'] = "nobody"
+        else:
+            _input['userid'] = "dirsrv"
+            _input['group'] = "dirsrv"
 
     # TODO: Verify the user and group exist.
 
@@ -222,10 +236,12 @@ ServerAdminPwd = %(admin_pass)s
     os.write(fp, data)
     os.close(fp)
 
-    setup_ds_admin = "/usr/sbin/setup-ds-admin.pl"
-
-    if not os.path.isfile(setup_ds_admin):
-        setup_ds_admin = "/usr/sbin/setup-ds-admin"
+    if os.path.isfile("/usr/sbin/setup-ds-admin.pl"):
+        setup_ds_admin = "/usr/sbin/setup-ds-admin.pl"
+    elif os.path.isfile("/usr/sbin/setup-ds"):
+        setup_ds_admin = "/usr/sbin/setup-ds"
+    else:
+        log.error(_("No directory server setup tool available."))
 
     command = [
             setup_ds_admin,
@@ -281,16 +297,27 @@ ServerAdminPwd = %(admin_pass)s
                     )
             )
     else:
-        log.warning(_("Could not find the Kolab schema file"))
+        log.warning(_("Could not find the ldap Kolab schema file"))
 
     if os.path.isfile('/bin/systemctl'):
         subprocess.call(['/bin/systemctl', 'restart', 'dirsrv.target'])
-        subprocess.call(['/bin/systemctl', 'enable', 'dirsrv.target'])
     elif os.path.isfile('/sbin/service'):
         subprocess.call(['/sbin/service', 'dirsrv', 'restart'])
-        subprocess.call(['/sbin/chkconfig', 'dirsrv', 'on'])
+    elif os.path.isfile('/usr/sbin/service'):
+        subprocess.call(['/usr/sbin/service','dirsrv','stop'])
+        time.sleep(20)
+        subprocess.call(['/usr/sbin/service','dirsrv','start'])
     else:
-        log.error(_("Could not start and configure to start on boot, the " + \
+        log.error(_("Could not start the directory server service."))
+
+    if os.path.isfile('/bin/systemctl'):
+        subprocess.call(['/bin/systemctl', 'enable', 'dirsrv.target'])
+    elif os.path.isfile('/sbin/chkconfig'):
+        subprocess.call(['/sbin/chkconfig', 'dirsrv', 'on'])
+    elif os.path.isfile('/usr/sbin/update-rc.d'):
+        subprocess.call(['/usr/sbin/update-rc.d', 'dirsrv', 'defaults'])
+    else:
+        log.error(_("Could not configure to start on boot, the " + \
                 "directory server service."))
 
     if ask_questions:
@@ -520,8 +547,10 @@ ServerAdminPwd = %(admin_pass)s
 
     if os.path.isfile('/bin/systemctl'):
         subprocess.call(['/bin/systemctl', 'enable', 'dirsrv-admin.service'])
-    elif os.path.isfile('/sbin/service'):
+    elif os.path.isfile('/sbin/chkconfig'):
         subprocess.call(['/sbin/chkconfig', 'dirsrv-admin', 'on'])
+    elif os.path.isfile('/usr/sbin/update-rc.d'):
+        subprocess.call(['/usr/sbin/update-rc.d', 'dirsrv-admin', 'defaults'])
     else:
         log.error(_("Could not start and configure to start on boot, the " + \
                 "directory server admin service."))
