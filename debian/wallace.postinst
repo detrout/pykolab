@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#DEBHELPER#
+
+set -e
+
+case "$1" in
+    install|upgrade|configure)
+
+        mkdir -p /var/spool/pykolab/wallace && chown -R kolab:kolab-n /var/spool/pykolab
+    ;;
+esac
