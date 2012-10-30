@@ -1,6 +1,7 @@
-pykolab (0.5.6-2) UNRELEASED; urgency=low
+pykolab (0.5.6-2) unstable; urgency=low
 
-  * Make kolab-cli depend on kolab-telemetry 
+  * /usr/lib*/python*/*-packages/pykolab/cli/telemetry/* moved to kolab-telemetry
+  * removed various example files (debian/*.ex)
 
  -- Paul Klos <klos@hosted02.kolabsys.net>  Tue, 30 Oct 2012 12:35:41 -0400
 

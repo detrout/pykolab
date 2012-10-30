@@ -46,7 +46,7 @@ Description: Kolab Groupware daemon and utilities
 
 Package: kolab-cli
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, python-augeas, python-cheetah, kolab-telemetry
+Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}, python-augeas, python-cheetah
 Description: Command-line utilities for Kolab
  This package includes command-line utilities for Kolab Groupware
 

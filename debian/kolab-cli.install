@@ -1,4 +1,4 @@
-usr/lib*/python*/*-packages/pykolab/cli/
+usr/lib*/python*/*-packages/pykolab/cli/*.py
 usr/lib*/python*/*-packages/pykolab/wap_client/
 usr/lib*/python*/*-packages/kolab/
 usr/sbin/kolab
