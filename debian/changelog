@@ -1,3 +1,12 @@
+pykolab (0.5.6-3) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Remove obsolete patches, correct path for imapd.conf(5) certificate paths
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Wed, 07 Nov 2012 09:13:32 -0500
+
 pykolab (0.5.6-2) unstable; urgency=low
 
   * /usr/lib*/python*/*-packages/pykolab/cli/telemetry/*
