@@ -1,0 +1,17 @@
+Index: pykolab/share/templates/imapd.conf.tpl
+===================================================================
+--- pykolab.orig/share/templates/imapd.conf.tpl	2012-09-30 11:19:41.058234995 -0400
++++ pykolab/share/templates/imapd.conf.tpl	2012-11-07 08:59:09.342227416 -0500
+@@ -6,9 +6,9 @@
+ sasl_pwcheck_method: auxprop saslauthd
+ sasl_mech_list: PLAIN LOGIN
+ allowplaintext: no
+-tls_cert_file: /etc/pki/cyrus-imapd/cyrus-imapd.pem
+-tls_key_file: /etc/pki/cyrus-imapd/cyrus-imapd.pem
+-tls_ca_file: /etc/pki/tls/certs/ca-bundle.crt
++tls_cert_file: /etc/ssl/private/cyrus-imapd.pem
++tls_key_file: /etc/ssl/private/cyrus-imapd.pem
++tls_ca_file: /etc/ssl/private/ca-bundle.crt
+ # uncomment this if you're operating in a DSCP environment (RFC-4594)
+ # qosmarking: af13
+ auth_mech: pts
