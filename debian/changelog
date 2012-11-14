@@ -1,3 +1,12 @@
+pykolab (0.5.6-4) unstable; urgency=low
+  * Remove dependency on libsasl2-modules-ldap from kolab-saslauthd
+  * Diasable wallaced upon installation and enable during kolab-setup
+  * Diasable kolabd upon installation and enable during kolab-setup
+  * Added debian/watch
+  * Add patch description (solves quilt-patch-missing-description warning)
+
+ -- Paul Klos <kolab@klos2day.nl>  Wed, 14 Nov 2012 17:06:21 -0500
+
 pykolab (0.5.6-3) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
