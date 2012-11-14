@@ -1,8 +1,8 @@
 Enable wallace after configuration is complete.
 Wallace is disabled when installed.
 
---- pykolab/setup/setup_mta.py.orig
-+++ pykolab/setup/setup_mta.py
+--- a/ykolab/setup/setup_mta.py
++++ b/pykolab/setup/setup_mta.py
 @@ -319,7 +319,15 @@
              myaugeas.set(setting,'1')
              myaugeas.save()
