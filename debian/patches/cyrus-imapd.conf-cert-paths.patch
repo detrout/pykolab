@@ -1,3 +1,5 @@
+Correct paths for installed certificates.
+
 Index: pykolab/share/templates/imapd.conf.tpl
 ===================================================================
 --- pykolab.orig/share/templates/imapd.conf.tpl	2012-09-30 11:19:41.058234995 -0400
