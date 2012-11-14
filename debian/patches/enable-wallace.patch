@@ -1,0 +1,22 @@
+Enable wallace after configuration is complete.
+Wallace is disabled when installed.
+
+--- pykolab/setup/setup_mta.py.orig
++++ pykolab/setup/setup_mta.py
+@@ -319,7 +319,15 @@
+             myaugeas.set(setting,'1')
+             myaugeas.save()
+         myaugeas.close()
+-        
++
++    if os.path.isfile('/etc/default/wallace'):
++        myaugeas = Augeas()
++        setting = os.path.join('/files/etc/default/wallace','START')
++        if not myaugeas.get(setting) == 'yes':
++            myaugeas.set(setting,'yes')
++            myaugeas.save()
++        myaugeas.close()
++
+     if os.path.isfile('/bin/systemctl'):
+         subprocess.call(['systemctl', 'restart', 'postfix.service'])
+         subprocess.call(['systemctl', 'restart', 'amavisd.service'])
