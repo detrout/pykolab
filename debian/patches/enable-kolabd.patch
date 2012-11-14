@@ -1,4 +1,5 @@
-Enable kolabd when everything is setup
+Enable kolabd after configuration is complete.
+kolabd is disabled when installed.
 
 --- a/pykolab/setup/setup_kolabd.py
 +++ b/pykolab/setup/setup_kolabd.py
