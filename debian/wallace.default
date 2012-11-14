@@ -2,5 +2,9 @@
 #
 # See wallaced --help for more flags.
 #
+
+# Should wallaced run automatically on startup? (default: no)
+START=no
+
 FLAGS="-l warning"
 DAEMON_ARGS="--fork --user kolab" 
