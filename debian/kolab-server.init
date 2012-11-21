@@ -67,8 +67,6 @@ do_start()
 	start-stop-daemon \
 		--start \
 		--quiet \
-		--user $USER \
-		--group $GROUP \
 		--pidfile $PIDFILE \
 		--startas $DAEMON \
 		-- $FLAGS $DAEMON_ARGS \
@@ -95,8 +93,6 @@ do_stop()
 		  --retry=TERM/30/KILL/5 \
 		  --pidfile $PIDFILE \
 		  --startas $DAEMON \
-		  --user $USER \
-		  --group $GROUP \
 		  --name $NAME
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
