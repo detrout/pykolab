@@ -59,6 +59,7 @@ do_start()
 	  mkdir $SOCKETDIR
 	fi
 	chown $USER:$GROUP $SOCKETDIR
+	chmod 0755 $SOCKETDIR
 
 	start-stop-daemon \
 		--start \
