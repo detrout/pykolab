@@ -13,7 +13,7 @@ Index: pykolab/share/templates/imapd.conf.tpl
 -tls_ca_file: /etc/pki/tls/certs/ca-bundle.crt
 +tls_cert_file: /etc/ssl/private/cyrus-imapd.pem
 +tls_key_file: /etc/ssl/private/cyrus-imapd.pem
-+tls_ca_file: /etc/ssl/private/ca-bundle.crt
++tls_ca_file: /etc/ssl/private/cyrus-imapd.pem
  # uncomment this if you're operating in a DSCP environment (RFC-4594)
  # qosmarking: af13
  auth_mech: pts
