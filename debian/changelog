@@ -2,6 +2,7 @@ pykolab (0.5.6-7) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
   * Set tls_ca to the same self-generated certificate file (#1260)
+  * Correct service init script $NAME
 
   [ Jeroen van Meeuwen ]
 
