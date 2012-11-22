@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 ### BEGIN INIT INFO
-# Provides: wallaced
+# Provides: wallace
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Required-Start: $remote_fs $local_fs $network
@@ -12,8 +12,8 @@
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="The Kolab Wallace server daemon is a content filtering daemon" # Introduce a short description here
-NAME=wallaced						# Introduce the short server's name here
-DAEMON=/usr/sbin/wallaced			# Introduce the server's location here
+NAME=wallace			# Introduce the short server's name here
+DAEMON=/usr/sbin/wallaced	# Introduce the server's location here
 DAEMON_ARGS="--fork -l warning"	# Arguments to run the daemon with
 PIDFILE=/run/wallaced/wallaced.pid
 LOCKFILE=/run/lock/$NAME
