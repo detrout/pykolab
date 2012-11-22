@@ -1,3 +1,12 @@
+pykolab (0.5.6-7) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Set tls_ca to the same self-generated certificate file (#1260)
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Thu, 22 Nov 2012 03:18:44 -0500
+
 pykolab (0.5.6-6) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
