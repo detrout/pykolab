@@ -2,11 +2,11 @@ pykolab (0.5.8-2) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
   * Patch unlinking mysql tmp my.cnf too early
-  * Only ask the mysql server question if there's a local socket detected
+  * Update patches
 
   [ Jeroen van Meeuwen ]
 
- -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Sun, 25 Nov 2012 07:42:49 -0500
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Sun, 25 Nov 2012 07:56:34 -0500
 
 pykolab (0.5.8-1) unstable; urgency=low
 
