@@ -56,35 +56,58 @@ def execute(*args, **kw):
         subprocess.call(['/usr/sbin/update-rc.d', 'mysql', 'defaults'])
     else:
         log.error(_("Could not configure to start on boot, the " + \
-                "MySQL database service."))                
-                
-    print >> sys.stderr, utils.multiline_message(
-            _("""
-                    Please supply a root password for MySQL. This password will
-                    be the administrative user for this MySQL server, and it
-                    should be kept a secret. After this setup process has
-                    completed, Kolab is going to discard and forget about this
-                    password, but you will need it for administrative tasks in
-                    MySQL.
-                """)
-        )
+                "MySQL database service."))
 
-    mysql_root_password = utils.ask_question(
-            _("MySQL root password"),
-            default=utils.generate_password(),
-            password=True,
-            confirm=True
-        )
+    options = {
+            1: "Existing MySQL server (with root password already set).",
+            2: "New MySQL server (needs to be initialized)."
+        }
 
-    p1 = subprocess.Popen(['echo', 'UPDATE mysql.user SET Password=PASSWORD(\'%s\') WHERE User=\'root\';' % (mysql_root_password)], stdout=subprocess.PIPE)
-    p2 = subprocess.Popen(['mysql'], stdin=p1.stdout)
-    p1.stdout.close()
-    p2.communicate()
+    answer = 0
+    if os.path.exists('/var/run/mysqld/mysqld.sock'):
+        answer = utils.ask_menu(_("What MySQL server are we setting up?"), options)
 
-    p1 = subprocess.Popen(['echo', 'FLUSH PRIVILEGES;'], stdout=subprocess.PIPE)
-    p2 = subprocess.Popen(['mysql'], stdin=p1.stdout)
-    p1.stdout.close()
-    p2.communicate()
+    if answer == "1" or answer == 1:
+        print >> sys.stderr, utils.multiline_message(
+                _("""
+                        Please supply the root password for MySQL, so we can set
+                        up user accounts for other components that use MySQL.
+                    """)
+            )
+
+        mysql_root_password = utils.ask_question(
+                _("MySQL root password"),
+                password=True
+            )
+
+    else:
+        print >> sys.stderr, utils.multiline_message(
+                _("""
+                        Please supply a root password for MySQL. This password
+                        will be the administrative user for this MySQL server,
+                        and it should be kept a secret. After this setup process
+                        has completed, Kolab is going to discard and forget
+                        about this password, but you will need it for
+                        administrative tasks in MySQL.
+                    """)
+            )
+
+        mysql_root_password = utils.ask_question(
+                _("MySQL root password"),
+                default=utils.generate_password(),
+                password=True,
+                confirm=True
+            )
+
+        p1 = subprocess.Popen(['echo', 'UPDATE mysql.user SET Password=PASSWORD(\'%s\') WHERE User=\'root\';' % (mysql_root_password)], stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(['mysql'], stdin=p1.stdout)
+        p1.stdout.close()
+        p2.communicate()
+
+        p1 = subprocess.Popen(['echo', 'FLUSH PRIVILEGES;'], stdout=subprocess.PIPE)
+        p2 = subprocess.Popen(['mysql'], stdin=p1.stdout)
+        p1.stdout.close()
+        p2.communicate()
 
     data = """
 [mysql]
@@ -93,6 +116,7 @@ password='%s'
 """ % (mysql_root_password)
 
     fp = open('/tmp/kolab-setup-my.cnf', 'w')
+    os.chmod('/tmp/kolab-setup-my.cnf', 0600)
     fp.write(data)
     fp.close()
 

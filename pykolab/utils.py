@@ -123,6 +123,32 @@ def ask_confirmation(question, default="y", all_inclusive_no=True):
             else:
                 return True
 
+def ask_menu(question, options={}):
+    print question
+    answer_correct = False
+    max_key_length = 0
+
+    keys = options.keys()
+    keys.sort()
+
+    while not answer_correct:
+        for key in keys:
+            key_length = len("%s" % key)
+            if key_length > max_key_length:
+                max_key_length = key_length
+
+        str_format = "%%%ds" % max_key_length
+
+        for key in keys:
+            print " - " + eval("str_format % key") + ": " + options[key]
+
+        answer = raw_input(_("Choice") + ": ")
+
+        if answer in [str(x) for x in options.keys()]:
+            answer_correct = True
+
+    return answer
+
 def ensure_directory(_dir, _user='root', _group='root'):
     if not os.path.isdir(_dir):
         os.makedirs(_dir)
@@ -368,6 +394,26 @@ def translate(mystring, locale_name='en_US'):
     result = process.communicate()[0].strip()
 
     return result
+
+def true_or_false(val):
+    if val == None:
+        return False
+
+    if isinstance(val, bool):
+        return val
+
+    if isinstance(val, basestring) or isinstance(val, str):
+        val = val.lower()
+        if val in [ "true", "yes", "y" ]:
+            return True
+        else:
+            return False
+
+    if isinstance(val, int) or isinstance(val, float):
+        if val >= 1:
+            return True
+        else:
+            return False
 
 def is_service(services):
     """

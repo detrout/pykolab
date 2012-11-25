@@ -85,6 +85,9 @@ def list_commands(*args, **kw):
     _commands.sort()
 
     for _command in _commands:
+        if __commands[_command].has_key('group'):
+            continue
+
         if __commands[_command].has_key('function'):
             # This is a top-level command
             if not __commands[_command]['description'] == None:
@@ -105,6 +108,10 @@ def list_commands(*args, **kw):
                     print "%-4s%-21s" % ('',__command.replace('_','-'))
 
 def execute(cmd_name, *args, **kw):
+    if cmd_name == "":
+        execute("help")
+        sys.exit(0)
+
     if not commands.has_key(cmd_name):
         log.error(_("No such command."))
         sys.exit(1)
@@ -132,7 +139,6 @@ def execute(cmd_name, *args, **kw):
             pass
 
     conf.finalize_conf()
-    _cmd_name = conf.cli_args.pop(0)
     commands[cmd_name]['function'](conf.cli_args, kw)
 
 def register_group(dirname, module):
@@ -187,7 +193,7 @@ def register(cmd_name, func, group=None, description=None, aliases=[]):
             commands[alias] = {
                     'cmd_name': cmd_name,
                     'function': func,
-                    'description': _("Alias for %s") % (cmd_name)
+                    'description': _("Alias for %s") % (cmd_name.replace('_','-'))
                 }
 
 ##

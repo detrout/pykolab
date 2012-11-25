@@ -99,6 +99,7 @@
             'kolab_config',
             'kolab_folders',
             'libkolab',
+            'libcalendaring',
             'listcommands',
             'managesieve',
             'newmail_notifier',
