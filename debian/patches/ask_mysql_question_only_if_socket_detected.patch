@@ -1,0 +1,21 @@
+commit b825ff4493e15a751f0bee4291f7e4c0fa5cf5e2
+Author: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
+Date:   Sun Nov 25 10:32:01 2012 +0000
+
+    Really only ask the question what MySQL we are setting up if /var/run/mysqld/mysqld.sock exists
+
+diff --git a/pykolab/setup/setup_mysql.py b/pykolab/setup/setup_mysql.py
+index 8d419ad..1c5fd0c 100644
+--- a/pykolab/setup/setup_mysql.py
++++ b/pykolab/setup/setup_mysql.py
+@@ -63,7 +63,9 @@ def execute(*args, **kw):
+             2: "New MySQL server (needs to be initialized)."
+         }
+ 
+-    answer = utils.ask_menu(_("What MySQL server are we setting up?"), options)
++    answer = 0
++    if os.path.exists('/var/run/mysqld/mysqld.sock'):
++        answer = utils.ask_menu(_("What MySQL server are we setting up?"), options)
+ 
+     if answer == "1" or answer == 1:
+         print >> sys.stderr, utils.multiline_message(

@@ -1,3 +1,5 @@
 enable-kolabd.patch
 cyrus-imapd.conf-cert-paths.patch
 enable-wallace.patch
+0001-Move-unlinking-tmp-kolab-setup-my.cnf-from-component.patch
+ask_mysql_question_only_if_socket_detected.patch
