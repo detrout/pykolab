@@ -51,6 +51,15 @@ class Cli(object):
             if not arg.startswith('-') and len(sys.argv) >= arg_num:
                 if commands.commands.has_key(sys.argv[arg_num].replace('-','_')):
                     to_execute.append(sys.argv[arg_num].replace('-','_'))
+                    
+                if commands.commands.has_key("%s_%s" % (
+                        '_'.join(to_execute),sys.argv[arg_num].replace('-','_')
+                    )):
+
+                    to_execute.append(sys.argv[arg_num].replace('-','_'))
+
+        for cmd_component in to_execute:
+            sys.argv.pop(sys.argv.index(cmd_component.replace('_','-')))
 
         commands.execute('_'.join(to_execute))
 
