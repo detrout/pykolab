@@ -1,8 +1,8 @@
-From 783eff350b3234aead7ba66b9d1ebb32848e67ad Mon Sep 17 00:00:00 2001
+From 96f3ff3e3d315980d3f36f5a622f15377e6bdefc Mon Sep 17 00:00:00 2001
 From: "Jeroen van Meeuwen (Kolab Systems)" <vanmeeuwen@kolabsys.com>
 Date: Sun, 25 Nov 2012 12:38:44 +0000
-Subject: [PATCH] Move unlinking /tmp/kolab-setup-my.cnf from components to
- upper-level run call
+Subject: [PATCH 2/2] Move unlinking /tmp/kolab-setup-my.cnf from components
+ to upper-level run call
 
 ---
  pykolab/setup/__init__.py   | 4 ++++

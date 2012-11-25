@@ -1,4 +1,6 @@
 enable-kolabd.patch
 cyrus-imapd.conf-cert-paths.patch
 enable-wallace.patch
-0001-Move-unlinking-tmp-kolab-setup-my.cnf-from-component.patch
+0001-Remove-the-use-of-log-from-utils.patch
+0002-Move-unlinking-tmp-kolab-setup-my.cnf-from-component.patch
+
