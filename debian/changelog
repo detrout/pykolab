@@ -1,3 +1,12 @@
+pykolab (0.5.8-4) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Disable and shut down saslauthd before attempting to start kolab-saslauthd
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Sun, 25 Nov 2012 09:05:48 -0500
+
 pykolab (0.5.8-3) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
