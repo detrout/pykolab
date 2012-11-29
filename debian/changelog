@@ -1,3 +1,18 @@
+pykolab (0.5.8-5) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Add dependency on python-mysqldb (#1394)
+  * Rebase the set of permissions on /etc/kolab/, /etc/kolab/kolab.conf, /var/lib/kolab/ and /var/log/kolab/ on to the permissions used on our reference platform (#1395, part i)
+  * Ship patch for #1396
+  * Ship patch for #1397
+  * Correct patch and do not change the tls cert paths at all on Debian
+  * Do not install the Kolab SMTP Access Policy executable in its own subdirectory
+  * Ship fix for #1398
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Thu, 29 Nov 2012 14:13:50 +0100
+
 pykolab (0.5.8-4) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
