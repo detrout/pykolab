@@ -32,16 +32,25 @@ case "$1" in
                 --home /var/lib/kolab \
                 --gecos "Kolab System Account (R)" kolab-r &>/dev/null || :
 
-        chown -R kolab:kolab /var/lib/kolab /var/log/kolab
-        chgrp kolab /etc/kolab /etc/kolab/kolab.conf
-        chmod 750 /etc/kolab /var/lib/kolab /var/log/kolab
+        # Re-base the POSIX permission set on to the reference platform
+        chown root:root /etc/kolab
+        chmod 755 /etc/kolab
+        chown kolab-n:kolab /etc/kolab/kolab.conf
         chmod 640 /etc/kolab/kolab.conf
 
-        if ! dpkg-statoverride --list /var/lib/kolab >/dev/null; then
-            dpkg-statoverride --add kolab kolab 750 /var/lib/kolab
-            dpkg-statoverride --add kolab kolab 750 /var/log/kolab
+        chown -R kolab:kolab-n /var/lib/kolab /var/log/kolab
+        chmod 775 /var/lib/kolab /var/log/kolab
+
+        if dpkg-statoverride --list /var/lib/kolab >/dev/null; then
+            dpkg-statoverride --remove /var/lib/kolab
         fi
 
+        if dpkg-statoverride --list /var/log/kolab >/dev/null; then
+            dpkg-statoverride --remove /var/log/kolab
+        fi
+
+        dpkg-statoverride --update --add kolab kolab-n 775 /var/lib/kolab
+        dpkg-statoverride --update --add kolab kolab-n 775 /var/log/kolab
     ;;
 esac
 
