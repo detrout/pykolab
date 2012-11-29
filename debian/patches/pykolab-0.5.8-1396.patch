@@ -1,0 +1,49 @@
+commit ac54ca1427d5246a63dbdb9bccb47b8fb124d433
+Author: Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>
+Date:   Thu Nov 29 11:57:21 2012 +0000
+
+    Substitute the path to the Kolab SMTP Access Policy executable for the correct value (#1396)
+
+diff --git a/pykolab/setup/setup_mta.py b/pykolab/setup/setup_mta.py
+index 058abb3..7889942 100644
+--- a/pykolab/setup/setup_mta.py
++++ b/pykolab/setup/setup_mta.py
+@@ -237,6 +237,11 @@ result_attribute = mail
+     postfix_master_settings = {
+         }
+ 
++    if os.path.exists('/usr/lib/postfix/kolab_smtp_access_policy'):
++        postfix_master_settings['kolab_sap_executable_path'] = '/usr/lib/postfix/kolab_smtp_access_policy'
++    else:
++        postfix_master_settings['kolab_sap_executable_path'] = '/usr/libexec/postfix/kolab_smtp_access_policy'
++
+     template_file = None
+ 
+     if os.path.isfile('/etc/kolab/templates/master.cf.tpl'):
+diff --git a/share/templates/master.cf.tpl b/share/templates/master.cf.tpl
+index 7fa7dac..161d053 100644
+--- a/share/templates/master.cf.tpl
++++ b/share/templates/master.cf.tpl
+@@ -171,17 +171,17 @@ smtp-wallace    unix    -   -   n   -       3   smtp
+     -o smtpd_authorized_xforward_hosts=127.0.0.0/8
+ 
+ recipient_policy unix    -   n   n   -       -   spawn
+-    user=kolab-n argv=/usr/libexec/postfix/kolab_smtp_access_policy --verify-recipient
++    user=kolab-n argv=${kolab_sap_executable_path} --verify-recipient
+ 
+ recipient_policy_incoming unix - n n -       -   spawn
+-    user=kolab-n argv=/usr/libexec/postfix/kolab_smtp_access_policy --verify-recipient --allow-unauthenticated
++    user=kolab-n argv=${kolab_sap_executable_path} --verify-recipient --allow-unauthenticated
+ 
+ sender_policy    unix    -   n   n   -       -   spawn
+-    user=kolab-n argv=/usr/libexec/postfix/kolab_smtp_access_policy --verify-sender
++    user=kolab-n argv=${kolab_sap_executable_path} --verify-sender
+ 
+ sender_policy_incoming unix - n  n   -       -   spawn
+-    user=kolab-n argv=/usr/libexec/postfix/kolab_smtp_access_policy --verify-sender --allow-unauthenticated
++    user=kolab-n argv=${kolab_sap_executable_path} --verify-sender --allow-unauthenticated
+ 
+ submission_policy unix - n n - - spawn
+-    user=kolab-n argv=/usr/libexec/postfix/kolab_smtp_access_policy --verify-sender --verify-recipient
++    user=kolab-n argv=${kolab_sap_executable_path} --verify-sender --verify-recipient
+ 
