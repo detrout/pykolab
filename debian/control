@@ -21,10 +21,11 @@ Build-Depends:  autotools-dev,
                 mime-support,
                 python (>= 2.6~),
                 python2.6,
+                python-icalendar,
                 python-minimal,
+		python-mysqldb,
                 python-nose,
                 python-support,
-                python-icalendar
 Standards-Version: 3.9.3
 Homepage: http://www.kolab.org
 Vcs-Git: git://git.kolab.org/git/pykolab
