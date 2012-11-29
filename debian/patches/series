@@ -7,3 +7,4 @@ enable-wallace.patch
 0004-Disable-and-shut-down-saslauthd-before-starting-kola.patch
 pykolab-0.5.8-1396.patch
 pykolab-0.5.8-1397.patch
+pykolab-0.5.8-1398.patch

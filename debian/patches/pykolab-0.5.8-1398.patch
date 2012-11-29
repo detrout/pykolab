@@ -1,0 +1,17 @@
+diff --git a/pykolab/setup/setup_mta.py b/pykolab/setup/setup_mta.py
+index eb26a4d..8dd338d 100644
+--- a/pykolab/setup/setup_mta.py
++++ b/pykolab/setup/setup_mta.py
+@@ -268,6 +268,12 @@ result_attribute = mail
+         log.error(_("Could not write out Postfix configuration file /etc/postfix/master.cf"))
+         return
+ 
++    if os.path.isdir('/etc/postfix/sasl/'):
++        fp = open('/etc/postfix/sasl/smtpd.conf', 'w')
++        fp.write("pwcheck_method: saslauthd\n")
++        fp.write("mech_list: plain login\n")
++        fp.close()
++
+     amavisd_settings = {
+             'ldap_server': 'localhost',
+             'ldap_bind_dn': conf.get('ldap', 'service_bind_dn'),
