@@ -1,3 +1,12 @@
+pykolab (0.5.8-6) unstable; urgency=low
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Correct init scripts to not use --user / --group as parameters to start-stop-daemon, as that has the effect of verifying the ownership of PID files (#1401)
+
+  [ Jeroen van Meeuwen ]
+
+ -- Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen@kolabsys.com>  Thu, 29 Nov 2012 14:44:45 +0100
+
 pykolab (0.5.8-5) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
