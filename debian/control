@@ -23,7 +23,6 @@ Build-Depends:  autotools-dev,
                 python2.6,
                 python-icalendar,
                 python-minimal,
-		python-mysqldb,
                 python-nose,
                 python-support,
 Standards-Version: 3.9.3
@@ -41,7 +40,8 @@ Depends: ${shlibs:Depends},
           python-pyasn1-modules,
           python-sqlalchemy,
           adduser (>= 3.11),
-          python-icalendar
+          python-icalendar,
+          python-mysqldb
 Description: Kolab Groupware daemon and utilities                                                                                          
  Python implementation of the Kolab Groupware server
 
