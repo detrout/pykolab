@@ -1,3 +1,9 @@
+pykolab (0.5.8-7) unstable; urgency=low
+
+  * Move python-mysqldb from build-depends to pykolab depends
+
+ -- Paul Klos <kolab@klos2day.nl>  Tue, 04 Dec 2012 18:11:07 +0100
+
 pykolab (0.5.8-6) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
