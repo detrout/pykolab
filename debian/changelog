@@ -1,3 +1,9 @@
+pykolab (0.5.8-8) unstable; urgency=low
+
+  * Fix issues in wallace and kolabd init script (#1404)
+
+ -- Paul Klos <kolab@klos2day.nl>  Sun, 16 Dec 2012 15:45:56 +0100
+
 pykolab (0.5.8-7) unstable; urgency=low
 
   * Move python-mysqldb from build-depends to pykolab depends
