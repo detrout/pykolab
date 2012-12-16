@@ -1,6 +1,6 @@
 #! /bin/bash
 ### BEGIN INIT INFO
-# Provides: kolabd
+# Provides: kolab-server
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Required-Start: $remote_fs $local_fs $network
@@ -13,11 +13,11 @@
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="The Kolab server synchronizes LDAP, SQL and other authentication databases with Cyrus IMAP, Dovecot or other IMAP servers." # Introduce a short description here
-NAME=kolabd							# Introduce the short server's name here
-DAEMON=/usr/sbin/kolabd				# Introduce the server's location here
+NAME=kolabd                            # Introduce the short server's name here
+DAEMON=/usr/sbin/kolabd                # Introduce the server's location here
 USER="kolab"
 GROUP="kolab-n"
-DAEMON_ARGS="--fork --user $USER --group $GROUP"	# Arguments to run the daemon with
+DAEMON_ARGS="--fork --user $USER"      # Arguments to run the daemon with
 FLAGS="-l warning"
 PIDFILE=/run/$NAME/$NAME.pid
 LOCKFILE=/run/lock/$NAME
@@ -39,10 +39,10 @@ SCRIPTNAME=/etc/init.d/$NAME
 #
 do_start()
 {
-	# Return
-	#   0 if daemon has been started
-	#   1 if daemon was already running
-	#   2 if daemon could not be started
+    # Return
+    #   0 if daemon has been started
+    #   1 if daemon was already running
+    #   2 if daemon could not be started
 
     # If the daemon is not enabled, give the user a warning and stop.
     if [ "$START" != "yes" ]; then
@@ -50,28 +50,28 @@ do_start()
         return 0
     fi
 
-	if [ ! -d /run/$NAME ]; then
-	  mkdir /run/$NAME
-	fi
-	chown $USER:$GROUP /run/$NAME
+    if [ ! -d /run/$NAME ]; then
+      mkdir /run/$NAME
+    fi
+    chown $USER:$GROUP /run/$NAME
 
-	start-stop-daemon \
-		--start \
-		--quiet \
-		--pidfile $PIDFILE \
-		--startas $DAEMON \
-		--test > /dev/null \
-		|| return 1
-	start-stop-daemon \
-		--start \
-		--quiet \
-		--pidfile $PIDFILE \
-		--startas $DAEMON \
-		-- $FLAGS $DAEMON_ARGS \
-		|| return 2
-	# Add code here, if necessary, that waits for the process to be ready
-	# to handle requests from services started subsequently which depend
-	# on this one.  As a last resort, sleep for some time.
+    start-stop-daemon \
+        --start \
+        --quiet \
+        --startas $DAEMON \
+        --name $NAME \
+        --test > /dev/null \
+        || return 1
+    start-stop-daemon \
+        --start \
+        --quiet \
+        --exec $DAEMON \
+        --name $NAME \
+        -- $FLAGS $DAEMON_ARGS --pid-file $PIDFILE \
+        || return 2
+    # Add code here, if necessary, that waits for the process to be ready
+    # to handle requests from services started subsequently which depend
+    # on this one.  As a last resort, sleep for some time.
     touch $LOCKFILE
 }
 
@@ -80,32 +80,32 @@ do_start()
 #
 do_stop()
 {
-	# Return
-	#   0 if daemon has been stopped
-	#   1 if daemon was already stopped
-	#   2 if daemon could not be stopped
-	#   other if a failure occurred
-	start-stop-daemon \
-		  --stop \
-		  --quiet \
-		  --retry=TERM/30/KILL/5 \
-		  --pidfile $PIDFILE \
-		  --startas $DAEMON \
-		  --name $NAME
-	RETVAL="$?"
-	[ "$RETVAL" = 2 ] && return 2
-	# Wait for children to finish too if this is a daemon that forks
-	# and if the daemon is only ever run from this initscript.
-	# If the above conditions are not satisfied then add some other code
-	# that waits for the process to drop all resources that could be
-	# needed by services started subsequently.  A last resort is to
-	# sleep for some time.
-	start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
-	[ "$?" = 2 ] && return 2
-	# Many daemons don't delete their pidfiles when they exit.
-	rm -f $PIDFILE
-	rm -f $LOCKFILE
-	return "$RETVAL"
+    # Return
+    #   0 if daemon has been stopped
+    #   1 if daemon was already stopped
+    #   2 if daemon could not be stopped
+    #   other if a failure occurred
+    start-stop-daemon \
+          --stop \
+          --quiet \
+          --retry=TERM/30/KILL/5 \
+          --user $USER \
+          --startas $DAEMON \
+          --name $NAME
+    RETVAL="$?"
+    [ "$RETVAL" = 2 ] && return 2
+    # Wait for children to finish too if this is a daemon that forks
+    # and if the daemon is only ever run from this initscript.
+    # If the above conditions are not satisfied then add some other code
+    # that waits for the process to drop all resources that could be
+    # needed by services started subsequently.  A last resort is to
+    # sleep for some time.
+    start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
+    [ "$?" = 2 ] && return 2
+    # Many daemons don't delete their pidfiles when they exit.
+    rm -f $PIDFILE
+    rm -f $LOCKFILE
+    return "$RETVAL"
 }
 
 case "$1" in
@@ -113,44 +113,42 @@ case "$1" in
     [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC " "$NAME"
     do_start
     case "$?" in
-		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-	esac
+        0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
   ;;
   stop)
-	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
-	do_stop
-	case "$?" in
-		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
-		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
-	esac
-	;;
+    [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+    do_stop
+    case "$?" in
+        0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+        2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+    esac
+    ;;
   status)
        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
        ;;
   restart|force-reload)
-	log_daemon_msg "Restarting $DESC" "$NAME"
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
-		esac
-		;;
-	  *)
-	  	# Failed to stop
-		log_end_msg 1
-		;;
-	esac
-	;;
+    log_daemon_msg "Restarting $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1)
+        do_start
+        case "$?" in
+            0) log_end_msg 0 ;;
+            1) log_end_msg 1 ;; # Old process is still running
+            *) log_end_msg 1 ;; # Failed to start
+        esac
+        ;;
+      *)
+          # Failed to stop
+        log_end_msg 1
+        ;;
+    esac
+    ;;
   *)
-	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
-	exit 3
-	;;
+    echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+    exit 3
+    ;;
 esac
-
 :
