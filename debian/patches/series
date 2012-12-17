@@ -1,3 +1,4 @@
+temporarily-disable-wallace.patch
 enable-kolabd.patch
 cyrus-imapd.conf-cert-paths.patch
 enable-wallace.patch

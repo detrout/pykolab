@@ -1,6 +1,9 @@
 Enable wallace after configuration is complete.
 Wallace is disabled when installed.
 
+!! Temporarily disable Wallace because of bug #1469 !!
+See: https://issues.kolab.org/show_bug.cgi?id=1469
+
 --- a/pykolab/setup/setup_mta.py
 +++ b/pykolab/setup/setup_mta.py
 @@ -319,7 +319,15 @@
@@ -12,8 +15,8 @@ Wallace is disabled when installed.
 +    if os.path.isfile('/etc/default/wallace'):
 +        myaugeas = Augeas()
 +        setting = os.path.join('/files/etc/default/wallace','START')
-+        if not myaugeas.get(setting) == 'yes':
-+            myaugeas.set(setting,'yes')
++        if not myaugeas.get(setting) == 'no':
++            myaugeas.set(setting,'no')
 +            myaugeas.save()
 +        myaugeas.close()
 +
