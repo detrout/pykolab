@@ -52,9 +52,11 @@ def execute(*args, **kw):
 
     resource_filter = conf.get('ldap', 'resource_filter')
 
+    server_host = utils.parse_ldap_uri(conf.get('ldap', 'ldap_uri'))[1]
+
     files = {
             "/etc/postfix/ldap/local_recipient_maps.cf": """
-server_host = localhost
+server_host = %(server_host)s
 server_port = 389
 version = 3
 search_base = %(base_dn)s
@@ -69,6 +71,7 @@ query_filter = (&(|(mail=%%s)(alias=%%s))(|%(kolab_user_filter)s%(kolab_group_fi
 result_attribute = mail
 """ % {
                         "base_dn": conf.get('ldap', 'base_dn'),
+                        "server_host": server_host,
                         "service_bind_dn": conf.get('ldap', 'service_bind_dn'),
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                         "kolab_user_filter": user_filter,
@@ -76,7 +79,7 @@ result_attribute = mail
                         "resource_filter": resource_filter,
                     },
             "/etc/postfix/ldap/mydestination.cf": """
-server_host = localhost
+server_host = %(server_host)s
 server_port = 389
 version = 3
 search_base = %(domain_base_dn)s
@@ -88,6 +91,7 @@ bind_pw = %(service_bind_pw)s
 query_filter = %(domain_filter)s
 result_attribute = %(domain_name_attribute)s
 """ % {
+                        "server_host": server_host,
                         "domain_base_dn": conf.get('ldap', 'domain_base_dn'),
                         "domain_filter": conf.get('ldap', 'domain_filter').replace('*', '%s'),
                         "domain_name_attribute": conf.get('ldap', 'domain_name_attribute'),
@@ -95,7 +99,7 @@ result_attribute = %(domain_name_attribute)s
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                     },
             "/etc/postfix/ldap/mailenabled_distgroups.cf": """
-server_host = localhost
+server_host = %(server_host)s
 server_port = 389
 version = 3
 search_base = %(group_base_dn)s
@@ -114,12 +118,13 @@ special_result_attribute = uniqueMember
 result_attribute =
 leaf_result_attribute = mail
 """ % {
+                        "server_host": server_host,
                         "group_base_dn": conf.get('ldap', 'group_base_dn'),
                         "service_bind_dn": conf.get('ldap', 'service_bind_dn'),
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                     },
             "/etc/postfix/ldap/mailenabled_dynamic_distgroups.cf": """
-server_host = localhost
+server_host = %(server_host)s
 server_port = 389
 version = 3
 search_base = %(group_base_dn)s
@@ -138,12 +143,13 @@ special_result_attribute = memberURL
 result_attribute =
 leaf_result_attribute = mail
 """ % {
+                        "server_host": server_host,
                         "group_base_dn": conf.get('ldap', 'group_base_dn'),
                         "service_bind_dn": conf.get('ldap', 'service_bind_dn'),
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                     },
             "/etc/postfix/ldap/transport_maps.cf": """
-server_host = localhost
+server_host = %(server_host)s
 server_port = 389
 version = 3
 search_base = %(base_dn)s
@@ -159,11 +165,12 @@ result_attribute = mail
 result_format = lmtp:unix:/var/lib/imap/socket/lmtp
 """ % {
                         "base_dn": conf.get('ldap', 'base_dn'),
+                        "server_host": server_host,
                         "service_bind_dn": conf.get('ldap', 'service_bind_dn'),
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                     },
             "/etc/postfix/ldap/virtual_alias_maps.cf": """
-server_host = localhost
+server_host = %(server_host)s
 server_port = 389
 version = 3
 search_base = %(base_dn)s
@@ -178,6 +185,7 @@ query_filter = (&(|(mail=%%s)(alias=%%s))(objectclass=kolabinetorgperson))
 result_attribute = mail
 """ % {
                         "base_dn": conf.get('ldap', 'base_dn'),
+                        "server_host": server_host,
                         "service_bind_dn": conf.get('ldap', 'service_bind_dn'),
                         "service_bind_pw": conf.get('ldap', 'service_bind_pw'),
                     },
@@ -198,8 +206,6 @@ result_attribute = mail
             "transport_maps": "ldap:/etc/postfix/ldap/transport_maps.cf",
             "virtual_alias_maps": "$alias_maps, ldap:/etc/postfix/ldap/virtual_alias_maps.cf, ldap:/etc/postfix/ldap/mailenabled_distgroups.cf, ldap:/etc/postfix/ldap/mailenabled_dynamic_distgroups.cf",
             "smtpd_tls_auth_only": "yes",
-            "smtpd_tls_cert_file": "/etc/pki/tls/private/localhost.pem",
-            "smtpd_tls_key_file": "/etc/pki/tls/private/localhost.pem",
             "smtpd_recipient_restrictions": "permit_mynetworks, reject_unauth_pipelining, reject_rbl_client zen.spamhaus.org, reject_non_fqdn_recipient, reject_invalid_helo_hostname, reject_unknown_recipient_domain, reject_unauth_destination, check_policy_service unix:private/recipient_policy_incoming, permit",
             "smtpd_sender_restrictions": "permit_mynetworks, check_policy_service unix:private/sender_policy_incoming",
             "submission_recipient_restrictions": "check_policy_service unix:private/submission_policy, permit_sasl_authenticated, reject",
@@ -208,6 +214,13 @@ result_attribute = mail
             "content_filter": "smtp-amavis:[127.0.0.1]:10024"
 
         }
+
+    if os.path.isfile('/etc/pki/tls/certs/make-dummy-cert') and not os.path.isfile('/etc/pki/tls/private/localhost.pem'):
+        subprocess.call(['/etc/pki/tls/certs/make-dummy-cert', '/etc/pki/tls/private/localhost.pem'])
+
+    if os.path.isfile('/etc/pki/tls/private/localhost.pem'):
+        postfix_main_settings['smtpd_tls_cert_file'] = "/etc/pki/tls/private/localhost.pem"
+        postfix_main_settings['smtpd_tls_key_file'] = "/etc/pki/tls/private/localhost.pem"
 
     if not os.path.isfile('/etc/postfix/main.cf'):
         if os.path.isfile('/usr/share/postfix/main.cf.debian'):
@@ -237,6 +250,11 @@ result_attribute = mail
     postfix_master_settings = {
         }
 
+    if os.path.exists('/usr/lib/postfix/kolab_smtp_access_policy'):
+        postfix_master_settings['kolab_sap_executable_path'] = '/usr/lib/postfix/kolab_smtp_access_policy'
+    else:
+        postfix_master_settings['kolab_sap_executable_path'] = '/usr/libexec/postfix/kolab_smtp_access_policy'
+
     template_file = None
 
     if os.path.isfile('/etc/kolab/templates/master.cf.tpl'):
@@ -260,11 +278,14 @@ result_attribute = mail
         log.error(_("Could not write out Postfix configuration file /etc/postfix/master.cf"))
         return
 
-    if os.path.isfile('/etc/pki/tls/certs/make-dummy-cert') and not os.path.isfile('/etc/pki/tls/private/localhost.pem'):
-        subprocess.call(['/etc/pki/tls/certs/make-dummy-cert', '/etc/pki/tls/private/localhost.pem'])
+    if os.path.isdir('/etc/postfix/sasl/'):
+        fp = open('/etc/postfix/sasl/smtpd.conf', 'w')
+        fp.write("pwcheck_method: saslauthd\n")
+        fp.write("mech_list: plain login\n")
+        fp.close()
 
     amavisd_settings = {
-            'ldap_server': 'localhost',
+            'ldap_server': '%(server_host)s',
             'ldap_bind_dn': conf.get('ldap', 'service_bind_dn'),
             'ldap_bind_pw': conf.get('ldap', 'service_bind_pw'),
             'primary_domain': conf.get('kolab', 'primary_domain'),
