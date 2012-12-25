@@ -1,10 +1,3 @@
 enable-kolabd.patch
 cyrus-imapd.conf-cert-paths.patch
 enable-wallace.patch
-0001-Remove-the-use-of-log-from-utils.patch
-0002-Move-unlinking-tmp-kolab-setup-my.cnf-from-component.patch
-0003-Import-os-before-using-it.patch
-0004-Disable-and-shut-down-saslauthd-before-starting-kola.patch
-pykolab-0.5.8-1396.patch
-pykolab-0.5.8-1397.patch
-pykolab-0.5.8-1398.patch
