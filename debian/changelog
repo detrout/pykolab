@@ -1,3 +1,20 @@
+pykolab (0.5.10-2) unstable; urgency=low
+
+  [ Paul Klos ]
+  * Correct wallace init script (solves #1404)
+  * Fix a couple of issues with the init script for kolab-server (kolabd) - Check for running daemon failed, so it was started every time the   script was run - Shutdown did not work
+  * Update changelog
+  * Disable Wallace
+  * Update changelog
+  * Add explanation to README file
+
+  [ Jeroen van Meeuwen (Kolab Systems) ]
+  * Drop the workaround for issue #1469
+
+  [ Jeroen van Meeuwen ]
+
+ -- Paul Klos <kolab@klos2day.nl>  Tue, 25 Dec 2012 12:23:13 +0100
+
 pykolab (0.5.10-1) unstable; urgency=low
 
   [ Jeroen van Meeuwen (Kolab Systems) ]
