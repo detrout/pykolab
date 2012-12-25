@@ -17,6 +17,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+import os
 import sys
 
 import pykolab
@@ -40,3 +41,7 @@ class Setup(object):
 
     def run(self):
         components.execute('_'.join(to_execute))
+
+        if os.path.exists('/tmp/kolab-setup-my.cnf'):
+            os.unlink('/tmp/kolab-setup-my.cnf')
+
