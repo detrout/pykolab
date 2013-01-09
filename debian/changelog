@@ -1,3 +1,10 @@
+pykolab (0.5.11-1) unstable; urgency=low
+
+  [ Paul Klos ]
+  * Imported upstream version 0.5.11
+
+ -- Paul Klos <kolab@klos2day.nl>  Wed, 09 Jan 2013 22:21:36 +0100
+
 pykolab (0.5.10-2) unstable; urgency=low
 
   [ Paul Klos ]
