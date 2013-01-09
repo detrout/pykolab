@@ -219,7 +219,13 @@ class LDAP(pykolab.base.Base):
         if conf.debuglevel > 8:
             trace_level = 1
 
-        self.ldap = ldap.initialize(uri, trace_level=trace_level)
+        self.ldap = ldap.ldapobject.ReconnectLDAPObject(
+                uri,
+                trace_level=trace_level,
+                retry_max=200,
+                retry_delay=3.0
+            )
+
         self.ldap.protocol_version = 3
         self.ldap.supported_controls = []
 
@@ -517,12 +523,14 @@ class LDAP(pykolab.base.Base):
                         log.debug(_("sec. mail pol. is not empty"))
                         want_attrs.append(_mail_attr)
 
-        log.debug(_("Attributes %r are not yet available for entry %r") % (
-                    want_attrs,
-                    entry_dn
-                ),
-                level=8
-            )
+        if len(want_attrs) > 0:
+            log.debug(_("Attributes %r are not yet available for entry %r") % (
+                        want_attrs,
+                        entry_dn
+                    ),
+                    level=8
+                )
+
         # Also append the preferredlanguage or 'native tongue' configured
         # for the entry.
         if not entry.has_key('preferredlanguage'):
@@ -546,19 +554,14 @@ class LDAP(pykolab.base.Base):
 
         # Primary mail address
         if not primary_mail == None:
-            if not entry.has_key(primary_mail_attribute) or \
-                    entry[primary_mail_attribute] == None:
-
-                primary_mail_address = conf.plugins.exec_hook(
-                        "set_primary_mail",
-                        kw={
-                                'primary_mail': primary_mail,
-                                'entry': entry,
-                                'primary_domain': self.domain
-                            }
-                    )
-            else:
-                primary_mail_address = entry[primary_mail_attribute]
+            primary_mail_address = conf.plugins.exec_hook(
+                    "set_primary_mail",
+                    kw={
+                            'primary_mail': primary_mail,
+                            'entry': entry,
+                            'primary_domain': self.domain
+                        }
+                )
 
             i = 1
             _primary_mail = primary_mail_address
@@ -1230,17 +1233,14 @@ class LDAP(pykolab.base.Base):
         pass
 
     def _change_modify_user(self, entry, change):
-        for entry_key in conf.changelog.keys():
-            log.debug(
-                    _("Current changelog entry %s with %s") % (
-                            entry_key,
-                            conf.changelog[entry_key]
-                        ),
-                    level=8
-                )
+        result_attribute = conf.get('cyrus-sasl','result_attribute')
 
-        if conf.changelog.has_key(entry['id']):
-            old_canon_attr = conf.changelog[entry['id']]
+        _entry = cache.get_entry(self.domain, entry)
+
+        log.debug("Entry.__dict__: %r" % (_entry.__dict__))
+
+        if _entry.__dict__.has_key('result_attribute') and not _entry.result_attribute == '':
+            old_canon_attr = _entry.result_attribute
 
         entry_changes = self.recipient_policy(entry)
 
@@ -1249,7 +1249,6 @@ class LDAP(pykolab.base.Base):
                 level=8
             )
 
-        result_attribute = conf.get('cyrus-sasl','result_attribute')
         if entry_changes.has_key(result_attribute):
             if not entry_changes[result_attribute] == old_canon_attr:
                 self.imap.user_mailbox_rename(
@@ -1257,7 +1256,8 @@ class LDAP(pykolab.base.Base):
                         entry_changes[result_attribute]
                     )
 
-                conf.changelog[entry['id']] = entry_changes[result_attribute]
+                entry[result_attribute] = entry_changes[result_attribute]
+                cache.get_entry(self.domain, entry)
 
         self.user_quota(entry, "user%s%s" % (self.imap.separator,entry[result_attribute]))
 
@@ -1355,10 +1355,34 @@ class LDAP(pykolab.base.Base):
         """
         result_attribute = conf.get('cyrus-sasl', 'result_attribute')
 
-        rcpt_addrs = self.recipient_policy(entry)
+        old_canon_attr = None
 
-        for key in rcpt_addrs.keys():
-            entry[key] = rcpt_addrs[key]
+        _entry = cache.get_entry(self.domain, entry, update=False)
+
+        if not _entry == None and _entry.__dict__.has_key('result_attribute') and not _entry.result_attribute == '':
+            old_canon_attr = _entry.result_attribute
+
+        entry_changes = self.recipient_policy(entry)
+
+        if entry.has_key(result_attribute) and entry_changes.has_key(result_attribute):
+            if not entry[result_attribute] == entry_changes[result_attribute]:
+                old_canon_attr = entry[result_attribute]
+
+        log.debug(
+                _("Result from recipient policy: %r") % (entry_changes),
+                level=8
+            )
+
+        if entry_changes.has_key(result_attribute) and not old_canon_attr == None:
+            if not entry_changes[result_attribute] == old_canon_attr:
+                self.imap.user_mailbox_rename(
+                        old_canon_attr,
+                        entry_changes[result_attribute]
+                    )
+
+        for key in entry_changes.keys():
+            entry[key] = entry_changes[key]
+            self.set_entry_attribute(entry, key, entry[key])
 
         cache.get_entry(self.domain, entry)
 
