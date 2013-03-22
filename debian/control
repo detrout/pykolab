@@ -53,7 +53,7 @@ Description: Command-line utilities for Kolab
 
 Package: kolab-conf
 Architecture: all
-Depends: pykolab (= ${binary:Version}), python, ${misc:Depends}
+Depends: pykolab (= ${binary:Version}), kolab-ldap, ${python:Depends}, python, ${misc:Depends}, python-augeas, python-cheetah
 Description: Configuration management for Kolab
  This package includes configuration management utilities for
  Kolab Groupware
