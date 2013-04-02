@@ -1,3 +1,10 @@
+pykolab (0.5.11-3) unstable; urgency=low
+
+  * Remove Kolab syncroton setup for Debian, since
+    kolab-syncroton takes care of its database setup.
+
+ -- Paul Klos <kolab@klos2day.nl>  Tue, 02 Apr 2013 21:53:11 +0200
+
 pykolab (0.5.11-2) unstable; urgency=low
 
   * Make kolab-conf depend on python-augeas and python-cheetah (bug #1616)
