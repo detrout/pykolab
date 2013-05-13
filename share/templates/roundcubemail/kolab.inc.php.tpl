@@ -8,4 +8,7 @@
     \$rcmail_config['kolab_cache'] = true;
 
     \$rcmail_config['kolab_ssl_verify_peer'] = false;
+
+    \$rcmail_config['kolab_use_subscriptions'] = true;
+
 ?>
