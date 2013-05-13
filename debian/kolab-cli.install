@@ -4,4 +4,3 @@ usr/lib*/python*/*-packages/kolab/
 usr/sbin/kolab
 usr/share/kolab/templates/*.tpl
 usr/share/kolab/templates/roundcubemail/*.tpl
-usr/share/kolab/templates/zpush/*.tpl
