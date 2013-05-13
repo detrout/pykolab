@@ -281,6 +281,8 @@ class LDAP(pykolab.base.Base):
 
         if entry_attrs.has_key(attribute):
             return entry_attrs[attribute]
+        elif entry_attrs.has_key(attribute.lower()):
+            return entry_attrs[attribute.lower()]
         else:
             return None
 
@@ -359,7 +361,6 @@ class LDAP(pykolab.base.Base):
 
         _filter = "%s%s%s" % (__filter_prefix,_filter,__filter_suffix)
 
-
         log.debug(_("Finding recipient with filter %r") % (_filter), level=8)
 
         if len(_filter) <= 6:
@@ -377,7 +378,10 @@ class LDAP(pykolab.base.Base):
 
         for _result in _results:
             (_entry_id, _entry_attrs) = _result
-            _entry_dns.append(_entry_id)
+
+            # Prevent Active Directory referrals
+            if not _entry_id == None:
+                _entry_dns.append(_entry_id)
 
         return _entry_dns
 
@@ -766,16 +770,25 @@ class LDAP(pykolab.base.Base):
                         entry_modifications[secondary_mail_attribute] = secondary_mail_addresses
                 else:
                     if isinstance(entry[secondary_mail_attribute], basestring):
-                        entry[secondary_mail_attribute] = list(set([entry[secondary_mail_attribute]]))
+                        entry[secondary_mail_attribute] = [entry[secondary_mail_attribute]]
+
+                    log.debug(_("secondary_mail_addresses: %r") % (secondary_mail_addresses), level=8)
+                    log.debug(_("entry[%s]: %r") % (secondary_mail_attribute,entry[secondary_mail_attribute]), level=8)
+
+                    secondary_mail_addresses.sort()
+                    entry[secondary_mail_attribute].sort()
+
+                    log.debug(_("secondary_mail_addresses: %r") % (secondary_mail_addresses), level=8)
+                    log.debug(_("entry[%s]: %r") % (secondary_mail_attribute,entry[secondary_mail_attribute]), level=8)
 
                     if not secondary_mail_addresses == entry[secondary_mail_attribute]:
                         self.set_entry_attribute(
                                 entry,
                                 secondary_mail_attribute,
-                                secondary_mail_addresses
+                                list(set(secondary_mail_addresses))
                             )
 
-                        entry_modifications[secondary_mail_attribute] = secondary_mail_addresses
+                        entry_modifications[secondary_mail_attribute] = list(set(secondary_mail_addresses))
 
         log.debug(_("Entry modifications list: %r") % (entry_modifications), level=8)
 
@@ -1750,6 +1763,10 @@ class LDAP(pykolab.base.Base):
         # Typical for Paged Results Control
         elif kw.has_key('entry') and isinstance(kw['entry'], list):
             for entry_dn,entry_attrs in kw['entry']:
+                # This is a referral
+                if entry_dn == None:
+                    continue
+
                 entry = { 'dn': entry_dn }
                 entry_attrs = utils.normalize(entry_attrs)
                 for attr in entry_attrs.keys():
@@ -2129,27 +2146,33 @@ class LDAP(pykolab.base.Base):
             _use_ldap_controls = self.ldap.supported_controls
 
         for supported_control in _use_ldap_controls:
-            exec("""_results = self.%s(
-                    %r,
-                    scope=%r,
-                    filterstr=%r,
-                    attrlist=%r,
-                    attrsonly=%r,
-                    timeout=%r,
-                    callback=callback,
-                    primary_domain=%r,
-                    secondary_domains=%r
-                )""" % (
-                        supported_control,
-                        base_dn,
-                        scope,
-                        filterstr,
-                        attrlist,
-                        attrsonly,
-                        timeout,
-                        primary_domain,
-                        secondary_domains
+            try:
+                exec("""_results = self.%s(
+                        %r,
+                        scope=%r,
+                        filterstr=%r,
+                        attrlist=%r,
+                        attrsonly=%r,
+                        timeout=%r,
+                        callback=callback,
+                        primary_domain=%r,
+                        secondary_domains=%r
+                    )""" % (
+                            supported_control,
+                            base_dn,
+                            scope,
+                            filterstr,
+                            attrlist,
+                            attrsonly,
+                            timeout,
+                            primary_domain,
+                            secondary_domains
+                        )
                     )
-                )
+
+                break
+
+            except:
+                continue
 
         return _results

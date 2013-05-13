@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2010-2012 Kolab Systems AG (http://www.kolabsys.com)
+# Copyright 2010-2013 Kolab Systems AG (http://www.kolabsys.com)
 #
 # Jeroen van Meeuwen (Kolab Systems) <vanmeeuwen a kolabsys.com>
 #
@@ -63,6 +63,9 @@ def worker_process(*args, **kw):
 
 class WallaceDaemon(object):
     def __init__(self):
+        self.current_connections = 0
+        self.max_connections = 24
+
         daemon_group = conf.add_cli_parser_option_group(_("Daemon Options"))
 
         daemon_group.add_option(
@@ -215,21 +218,29 @@ class WallaceDaemon(object):
                     if stage.lower() == "defer":
                         continue
 
+                    self.current_connections += 1
                     self.pool.apply_async(pickup_message, (filepath, (self.modules), {'module': module, 'stage': stage}))
+                    self.current_connections -= 1
 
                     continue
 
+                self.current_connections += 1
                 self.pool.apply_async(pickup_message, (filepath, (self.modules)))
+                self.current_connections -= 1
 
         try:
             while 1:
+                while self.current_connections >= self.max_connections:
+                    time.sleep(0.5)
+
                 pair = s.accept()
                 log.info(_("Accepted connection"))
                 if not pair == None:
+                    self.current_connections += 1
                     connection, address = pair
-                    #print "Accepted connection from %r" % (address)
                     channel = SMTPChannel(self, connection, address)
                     asyncore.loop()
+
         except Exception, errmsg:
             traceback.print_exc()
             s.shutdown(1)
@@ -247,7 +258,9 @@ class WallaceDaemon(object):
                         'from': mailfrom,
                         'to': rcpttos,
                         'data': data
-                   }
+                   },
+                ensure_ascii=True,
+                indent=4
             )
 
         (fp, filename) = tempfile.mkstemp(dir="/var/spool/pykolab/wallace/")
@@ -255,6 +268,8 @@ class WallaceDaemon(object):
         os.close(fp)
 
         self.pool.apply_async(pickup_message, (filename, (self.modules)))
+
+        self.current_connections -= 1
 
         return
 
@@ -368,8 +383,7 @@ class WallaceDaemon(object):
         except AttributeError, e:
             exitcode = 1
             traceback.print_exc()
-            print >> sys.stderr, _("Traceback occurred, please report a " + \
-                "bug at http://bugzilla.kolabsys.com")
+            print >> sys.stderr, _("Traceback occurred, please report a bug at http://bugzilla.kolabsys.com")
 
         except TypeError, e:
             exitcode = 1
@@ -378,8 +392,7 @@ class WallaceDaemon(object):
         except:
             exitcode = 2
             traceback.print_exc()
-            print >> sys.stderr, _("Traceback occurred, please report a " + \
-                "bug at http://bugzilla.kolabsys.com")
+            print >> sys.stderr, _("Traceback occurred, please report a bug at http://bugzilla.kolabsys.com")
 
         sys.exit(exitcode)
 

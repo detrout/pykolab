@@ -21,10 +21,14 @@ import getpass
 import grp
 import os
 import pwd
+import struct
 import sys
 
+import pykolab
 from pykolab import constants
 from pykolab.translate import _
+
+log = pykolab.getLogger('pykolab.utils')
 
 def ask_question(question, default="", password=False, confirm=False):
     """
@@ -268,15 +272,21 @@ def normalize(_object):
             if type(_object[key]) == list:
                 if _object[key] == None:
                     continue
+
                 if len(_object[key]) == 1:
                     result[key.lower()] = ''.join(_object[key])
                 else:
                     result[key.lower()] = _object[key]
+
             else:
                 if _object[key] == None:
                     continue
+
                 # What the heck?
                 result[key.lower()] = _object[key]
+
+        if result.has_key('objectsid') and not result['objectsid'][0] == "S":
+            result['objectsid'] = sid_to_string(result['objectsid'])
 
         if result.has_key('sn'):
             result['surname'] = result['sn'].replace(' ', '')
@@ -382,6 +392,24 @@ def pop_empty_from_list(_input_list):
         if not item == '':
             _output_list.append(item)
 
+def sid_to_string(sid):
+    srl = ord(sid[0])
+    number_sub_id = ord(sid[1])
+    iav = struct.unpack('!Q', '\x00\x00' + sid[2:8])[0]
+
+    sub_ids = []
+
+    for i in range(number_sub_id):
+        sub_ids.append(struct.unpack('<I',sid[8+4*i:12+4*i])[0])
+
+    result = 'S-%d-%d-%s' % (
+            srl,
+            iav,
+            '-'.join([str(s) for s in sub_ids]),
+        )
+
+    return result
+
 def standard_root_dn(domain):
     return 'dc=%s' % (',dc='.join(domain.split('.')))
 
@@ -389,14 +417,19 @@ def translate(mystring, locale_name='en_US'):
     import locale
     import subprocess
 
+    log.debug(_("Transliterating string %r with locale %r") % (mystring, locale_name), level=8)
+
     if len(locale.normalize(locale_name).split('.')) > 1:
         (locale_name,locale_charset) = locale.normalize(locale_name).split('.')
     else:
         locale_charset = 'utf-8'
 
     try:
+        log.debug(_("Attempting to set locale"), level=8)
         locale.setlocale(locale.LC_ALL, (locale_name,locale_charset))
+        log.debug(_("Success setting locale"), level=8)
     except:
+        log.debug(_("Failure to set locale"), level=8)
         pass
 
     command = [ '/usr/bin/iconv',
@@ -404,9 +437,10 @@ def translate(mystring, locale_name='en_US'):
                 '-t', 'ASCII//TRANSLIT',
                 '-s' ]
 
+    log.debug(_("Executing '%s | %s'") % (r"%s" % (mystring), ' '.join(command)), level=8)
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, env={'LANG': locale.normalize(locale_name)})
 
-    print >> process.stdin, mystring
+    print >> process.stdin, r"%s" % mystring
 
     result = process.communicate()[0].strip()
 
