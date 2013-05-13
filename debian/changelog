@@ -1,3 +1,11 @@
+pykolab (0.5.12-1~1.gbp2abae2) UNRELEASED; urgency=low
+
+  ** SNAPSHOT build @2abae285965672b24c106d1863d36e753a25a059 **
+
+  * Imported Upstream version 0.5.12
+
+ -- Paul Klos <kolab@klos2day.nl>  Mon, 13 May 2013 22:15:11 +0200
+
 pykolab (0.5.11-3) unstable; urgency=low
 
   * Remove Kolab syncroton setup for Debian, since
