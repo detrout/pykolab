@@ -4,6 +4,7 @@ pykolab (0.5.12-1) unstable; urgency=low
   * Update changelog
   * Remove installation line for non-existent freebusy templates
   * Remove installation line for non-existent z-push templates
+  * Remove git-buildpackage options
 
  -- Paul Klos <kolab@klos2day.nl>  Mon, 13 May 2013 23:02:33 +0200
 
