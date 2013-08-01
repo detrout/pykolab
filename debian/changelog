@@ -8,6 +8,8 @@ pykolab (0.5.12-1) unstable; urgency=low
 
   [Diane Trout]
   * update pykolab.install path for multi-arch postfix.
+  * Update debhelper compat to 9
+  * Update python dependencies to use python-all
 
  -- Paul Klos <kolab@klos2day.nl>  Mon, 13 May 2013 23:02:33 +0200
 
