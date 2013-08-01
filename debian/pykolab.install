@@ -1,10 +1,11 @@
 etc/kolab/kolab.conf
-usr/lib/pykolab/postfix/kolab_smtp_access_policy usr/lib/postfix/
+usr/lib/*/postfix/kolab_smtp_access_policy usr/lib/postfix/
 usr/lib*/python*/*-packages/cyruslib.py
 usr/lib*/python*/*-packages/pykolab/__init__.py
 usr/lib*/python*/*-packages/pykolab/auth/__init__.py
 usr/lib*/python*/*-packages/pykolab/auth/ldap/__init__.py
 usr/lib*/python*/*-packages/pykolab/auth/ldap/cache.py
+usr/lib*/python*/*-packages/pykolab/auth/ldap/syncrepl.py
 usr/lib*/python*/*-packages/pykolab/base.py
 usr/lib*/python*/*-packages/pykolab/conf/__init__.py
 usr/lib*/python*/*-packages/pykolab/conf/defaults.py
